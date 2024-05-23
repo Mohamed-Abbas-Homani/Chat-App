@@ -28,6 +28,7 @@ type WebSocketHandler struct {
 	broadcast   chan models.Message
 	userRepo    *repositories.UserRepository
 	messageRepo *repositories.MessageRepository
+	groupRepo   *repositories.GroupRepository
 }
 
 func NewWebSocketHandler(cfg *config.AppConfig, db *gorm.DB) *WebSocketHandler {
@@ -38,6 +39,7 @@ func NewWebSocketHandler(cfg *config.AppConfig, db *gorm.DB) *WebSocketHandler {
 		broadcast:   make(chan models.Message),
 		userRepo:    repositories.NewUserRepository(db),
 		messageRepo: repositories.NewMessageRepository(db),
+		groupRepo:   repositories.NewGroupRepository(db),
 	}
 }
 
@@ -83,8 +85,8 @@ func (h *WebSocketHandler) unregisterClient(client *Client) {
 }
 
 func (h *WebSocketHandler) updateUserStatus(userID uint, online bool) {
-	user := models.User{}
-	if err := h.db.First(&user, userID).Error; err != nil {
+	user, err := h.userRepo.GetUserByID(userID)
+	if err != nil {
 		log.Printf("Failed to find user: %v", err)
 		return
 	}
@@ -94,7 +96,7 @@ func (h *WebSocketHandler) updateUserStatus(userID uint, online bool) {
 		user.LastSeen = time.Now()
 	}
 
-	if err := h.db.Save(&user).Error; err != nil {
+	if err := h.userRepo.UpdateUser(user); err != nil {
 		log.Printf("Failed to update user status: %v", err)
 	}
 	log.Printf("Updated user %d status to %t", userID, online)
@@ -105,6 +107,7 @@ func (h *WebSocketHandler) broadcastSystemMessage(content string) {
 		Content:     content,
 		SenderID:    0, // system message
 		MessageType: models.MessageTypeSystem,
+		Status:      models.MessageStatusSent,
 	}
 	h.broadcast <- msg
 }
@@ -136,6 +139,7 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 
 		msg.SenderID = client.userID
 		msg.MessageType = models.MessageTypeChat
+		msg.Status = models.MessageStatusSent
 
 		if err := h.messageRepo.CreateMessage(&msg); err != nil {
 			log.Printf("Failed to save message: %v", err)
@@ -144,10 +148,12 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 
 		log.Printf("Message from user %d saved to database", client.userID)
 
-		if msg.RecipientID == 0 {
-			h.broadcast <- msg
+		if len(msg.Recipients) > 0 {
+			h.sendMessageToRecipients(msg)
+		} else if msg.GroupID != 0 {
+			h.sendMessageToGroup(msg)
 		} else {
-			h.sendMessageToRecipient(msg)
+			h.broadcast <- msg
 		}
 	}
 }
@@ -166,16 +172,38 @@ func (h *WebSocketHandler) Start() {
 	}
 }
 
-func (h *WebSocketHandler) sendMessageToRecipient(msg models.Message) {
-	for client := range h.clients {
-		if client.userID == msg.RecipientID {
-			if err := client.conn.WriteJSON(msg); err != nil {
-				log.Printf("WebSocket write error: %v", err)
-				client.conn.Close()
-				delete(h.clients, client)
+func (h *WebSocketHandler) sendMessageToRecipients(msg models.Message) {
+	for _, recipient := range msg.Recipients {
+		for client := range h.clients {
+			if client.userID == recipient.ID {
+				if err := client.conn.WriteJSON(msg); err != nil {
+					log.Printf("WebSocket write error: %v", err)
+					client.conn.Close()
+					delete(h.clients, client)
+				}
+				log.Printf("Sent message to recipient %d", recipient.ID)
 			}
-			log.Printf("Sent message to recipient %d", msg.RecipientID)
-			break
+		}
+	}
+}
+
+func (h *WebSocketHandler) sendMessageToGroup(msg models.Message) {
+	group, err := h.groupRepo.GetGroupByID(msg.GroupID)
+	if err != nil {
+		log.Printf("Failed to find group: %v", err)
+		return
+	}
+
+	for _, member := range group.Users {
+		for client := range h.clients {
+			if client.userID == member.ID {
+				if err := client.conn.WriteJSON(msg); err != nil {
+					log.Printf("WebSocket write error: %v", err)
+					client.conn.Close()
+					delete(h.clients, client)
+				}
+				log.Printf("Sent message to group member %d", member.ID)
+			}
 		}
 	}
 }

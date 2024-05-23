@@ -20,7 +20,7 @@ func (mr *MessageRepository) CreateMessage(message *models.Message) error {
 
 func (mr *MessageRepository) GetMessageByID(messageID uint) (*models.Message, error) {
 	var message models.Message
-	result := mr.db.First(&message, messageID)
+	result := mr.db.Preload("Recipients").First(&message, messageID)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -30,7 +30,9 @@ func (mr *MessageRepository) GetMessageByID(messageID uint) (*models.Message, er
 func (mr *MessageRepository) GetMessagesByUserID(userID uint) ([]*models.Message, error) {
 	var messages []*models.Message
 	result := mr.db.
-		Where("sender_id = ? OR recipient_id = ?", userID, userID).
+		Preload("Recipients").
+		Joins("JOIN message_recipients ON messages.id = message_recipients.message_id").
+		Where("messages.sender_id = ? OR message_recipients.user_id = ?", userID, userID).
 		Find(&messages)
 	if result.Error != nil {
 		return nil, result.Error
@@ -41,6 +43,7 @@ func (mr *MessageRepository) GetMessagesByUserID(userID uint) ([]*models.Message
 func (mr *MessageRepository) GetMessagesByGroupID(groupID uint) ([]*models.Message, error) {
 	var messages []*models.Message
 	result := mr.db.
+		Preload("Recipients").
 		Where("group_id = ?", groupID).
 		Find(&messages)
 	if result.Error != nil {
@@ -62,8 +65,10 @@ func (mr *MessageRepository) DeleteMessage(message *models.Message) error {
 func (mr *MessageRepository) GetChatHistory(userID uint) ([]models.Message, error) {
 	var messages []models.Message
 	err := mr.db.
-		Where("sender_id = ? OR recipient_id = ?", userID, userID).
-		Order("created_at ASC").Find(&messages).
+		Preload("Recipients").
+		Joins("JOIN message_recipients ON messages.id = message_recipients.message_id").
+		Where("messages.sender_id = ? OR message_recipients.user_id = ?", userID, userID).
+		Order("messages.created_at ASC").Find(&messages).
 		Error
 	return messages, err
 }
@@ -71,6 +76,7 @@ func (mr *MessageRepository) GetChatHistory(userID uint) ([]models.Message, erro
 func (mr *MessageRepository) GetGroupChatHistory(groupID uint) ([]models.Message, error) {
 	var messages []models.Message
 	err := mr.db.
+		Preload("Recipients").
 		Where("group_id = ?", groupID).
 		Order("created_at ASC").Find(&messages).
 		Error
