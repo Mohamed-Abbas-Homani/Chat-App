@@ -31,7 +31,7 @@ const Chat = () => {
   const [ws, setWs] = useState(null);
   const addUnseenMsg = useAddUnseenMsg();
   const fetchUsers = async () => {
-    const response = await fetch("http://192.168.224.117:8080/user/", {
+    const response = await fetch("http://localhost:8080/user/", {
       method: "GET",
     });
     const res = await response.json();
@@ -44,7 +44,7 @@ const Chat = () => {
   useEffect(() => {
     if (token) {
       
-      const socket = new WebSocket(`ws://192.168.224.117:8000/ws?token=${token}`);
+      const socket = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
 
       socket.onopen = () => {
         console.log("WebSocket connected");

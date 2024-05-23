@@ -158,7 +158,7 @@ const ProfilePage = () => {
   return (
     <ProfileContainer>
       <Avatar
-        src={`http://192.168.224.117:8080/${
+        src={`http://localhost:8080/${
           user.ProfilePicture ?? "uploads/default.jpg"
         }`}
         alt={username}

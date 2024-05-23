@@ -121,7 +121,7 @@ const Signup = ({ isLogin, setIsLogin }) => {
 
     try {
       const response = await axios.post(
-        "http://192.168.224.117:8080/signup",
+        "http://localhost:8080/signup",
         formData,
         {
           headers: {
