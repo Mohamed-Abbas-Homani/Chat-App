@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-
+import React, { useState, useMemo } from "react";
 import {
   useRecipient,
   useSetRecipient,
@@ -18,44 +17,38 @@ const UserList = () => {
   const setRecipient = useSetRecipient();
   const recipient = useRecipient();
   const [searchTerm, setSearchTerm] = useState("");
-  const [showOffline, setShowOffline] = useState(true);
-  const [showUnseen, setShowUnseen] = useState(false); // Add state for the unseen messages filter
-
-// Custom sorting function
-const sortUsers = (a, b) => {
-  // Sort by unseen messages
-  const unseenA = unseenMessages[a.ID] || 0;
-  const unseenB = unseenMessages[b.ID] || 0;
-  if (unseenA > unseenB) return -1;
-  if (unseenA < unseenB) return 1;
-
-  // Define status priorities
-  const statusPriority = {
-    "is typing...": 0,
-    "Online": 1,
-    "Offline": 2,
-  };
-
-  // Sort by status priority
-  const statusA = statusPriority[a.status] ?? 3;
-  const statusB = statusPriority[b.status] ?? 3;
-  if (statusA < statusB) return -1;
-  if (statusA > statusB) return 1;
-
-  // Finally, sort by username
-  return a.username.localeCompare(b.username);
-};
-
-const sortedUsers = users.sort(sortUsers);
-
-  const filteredUsers = sortedUsers.filter((user) => {
-    const matchesSearch = user.username.toLowerCase().includes(
-      searchTerm.toLowerCase()
-    );
-    const matchesOnlineStatus = showOffline || user.status == "Online";
-    const matchesUnseenStatus = !showUnseen || unseenMessages[user.ID] > 0;
-    return matchesSearch && matchesOnlineStatus && matchesUnseenStatus;
+  const [filterOptions, setFilterOptions] = useState({
+    showOffline: true,
+    showUnseen: false,
   });
+
+  const sortedUsers = useMemo(() => {
+    return users.sort((a, b) => {
+      const unseenA = unseenMessages[a.ID] || 0;
+      const unseenB = unseenMessages[b.ID] || 0;
+      if (unseenA > unseenB) return -1;
+      if (unseenA < unseenB) return 1;
+      const statusPriority = { "is typing...": 0, "Online": 1, "Offline": 2 };
+      const statusA = statusPriority[a.status] ?? 3;
+      const statusB = statusPriority[b.status] ?? 3;
+      if (statusA < statusB) return -1;
+      if (statusA > statusB) return 1;
+      return a.username.localeCompare(b.username);
+    });
+  }, [users, unseenMessages]);
+
+  const filteredUsers = useMemo(() => {
+    return sortedUsers.filter((user) => {
+      const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesOnlineStatus = filterOptions.showOffline || user.status === "Online";
+      const matchesUnseenStatus = !filterOptions.showUnseen || unseenMessages[user.ID] > 0;
+      return matchesSearch && matchesOnlineStatus && matchesUnseenStatus;
+    });
+  }, [sortedUsers, searchTerm, filterOptions, unseenMessages]);
+
+  const handleFilterChange = (option, value) => {
+    setFilterOptions((prev) => ({ ...prev, [option]: value }));
+  };
 
   return (
     <UserListContainer>
@@ -63,10 +56,8 @@ const sortedUsers = users.sort(sortUsers);
       <SearchAndFilter
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        showOffline={showOffline}
-        setShowOffline={setShowOffline}
-        showUnseen={showUnseen} // Pass showUnseen state
-        setShowUnseen={setShowUnseen} // Pass setShowUnseen function
+        filterOptions={filterOptions}
+        onFilterChange={handleFilterChange}
       />
       {filteredUsers.map((user, index) => (
         <UserItem

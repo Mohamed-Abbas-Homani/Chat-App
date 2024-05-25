@@ -12,6 +12,18 @@ export const useStore = create(
       setLogin: (user, token) => set({ user, token }),
       setLogout: () => set({ user: null, token: null }),
       setUsers: (users) => set({ users }),
+      updateUserStatus: (message) =>
+        set({
+          users: [
+            ...get().users.map((u) => {
+              if (u.ID == message.sender_id) {
+                u.status = message.content;
+                console.log(u.status);
+              }
+              return u;
+            }),
+          ],
+        }),
       setRecipient: (recipient) => {
         set({ recipient });
       },
@@ -51,17 +63,20 @@ export const useStoreWithoutStorage = create((set, get) => ({
       ],
     }),
 
-  markSeenMsg: (message, currendID) => set({messages: [
-    ...get().messages.map((m) => {
-      if (
-        m.sender_id == message.recipient_id &&
-        m.recipient_id == message.sender_id
-      ) {
-        m.status = "seen";
-      }
-      return m;
+  markSeenMsg: (message, currendID) =>
+    set({
+      messages: [
+        ...get().messages.map((m) => {
+          if (
+            m.sender_id == message.recipient_id &&
+            m.recipient_id == message.sender_id
+          ) {
+            m.status = "seen";
+          }
+          return m;
+        }),
+      ],
     }),
-  ]})
 }));
 
 export const useUser = () => useStore((state) => state.user);
@@ -71,6 +86,8 @@ export const useSetLogin = () => useStore((state) => state.setLogin);
 export const useSetLogout = () => useStore((state) => state.setLogout);
 export const useUsers = () => useStore((state) => state.users);
 export const useSetUsers = () => useStore((state) => state.setUsers);
+export const useUpdateUserStatus = () =>
+  useStore((state) => state.updateUserStatus);
 export const useMessages = () =>
   useStoreWithoutStorage((state) => state.messages);
 export const useSetMessages = () =>
