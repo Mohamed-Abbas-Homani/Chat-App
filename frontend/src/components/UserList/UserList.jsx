@@ -28,9 +28,9 @@ const UserList = () => {
       const unseenB = unseenMessages[b.ID] || 0;
       if (unseenA > unseenB) return -1;
       if (unseenA < unseenB) return 1;
-      const statusPriority = { "is typing...": 0, "Online": 1, "Offline": 2 };
-      const statusA = statusPriority[a.status] ?? 3;
-      const statusB = statusPriority[b.status] ?? 3;
+      const statusPriority = { "is picking emoji...": 0, "is typing...": 1, "Online": 2, "Offline": 3 };
+      const statusA = statusPriority[a.status] ?? 4;
+      const statusB = statusPriority[b.status] ?? 4;
       if (statusA < statusB) return -1;
       if (statusA > statusB) return 1;
       return a.username.localeCompare(b.username);

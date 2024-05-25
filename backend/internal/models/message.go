@@ -12,13 +12,8 @@ const (
 	MessageTypeStatus MessageType = "status"
 )
 
-type MessageStatus string
 
-const (
-	MessageStatusSent     MessageStatus = "sent"
-	MessageStatusDelivered MessageStatus = "delivered"
-	MessageStatusSeen      MessageStatus = "seen"
-)
+
 
 // Message represents a chat message.
 type Message struct {
@@ -28,5 +23,5 @@ type Message struct {
 	RecipientID uint           `json:"recipient_id"` // Single recipient
 	GroupID     uint           `json:"group_id"`     // Group ID
 	MessageType MessageType    `json:"message_type"`
-	Status      MessageStatus  `json:"status"`
+	Status      string  `json:"status"`
 }

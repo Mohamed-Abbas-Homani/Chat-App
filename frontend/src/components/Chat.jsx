@@ -83,6 +83,7 @@ const Chat = () => {
       ...users.map((u) => {
         if (u.ID == message.sender_id) {
           u.status = message.content;
+          u.last_seen = message.status
           console.log(u.status);
         }
         return u;

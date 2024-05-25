@@ -74,21 +74,21 @@ func (h *WebSocketHandler) registerClient(client *Client) {
 	h.clients[client] = true
 	log.Printf("User %d connected", client.userID)
 	h.updateUserStatus(client.userID, "Online")
-	h.broadcastSystemMessage(client.userID, "Online")
+	h.broadcastSystemMessage(client.userID, "Online","")
 }
 
 func (h *WebSocketHandler) unregisterClient(client *Client) {
 	delete(h.clients, client)
 	log.Printf("User %d disconnected", client.userID)
-	h.updateUserStatus(client.userID, "Offline")
-	h.broadcastSystemMessage(client.userID, "Offline")
+	last_seen := h.updateUserStatus(client.userID, "Offline")
+	h.broadcastSystemMessage(client.userID, "Offline", last_seen)
 }
 
-func (h *WebSocketHandler) updateUserStatus(userID uint, status string) {
+func (h *WebSocketHandler) updateUserStatus(userID uint, status string)string {
 	user, err := h.userRepo.GetUserByID(userID)
 	if err != nil {
 		log.Printf("Failed to find user: %v", err)
-		return
+		return ""
 	}
 
 	user.Status = status
@@ -100,14 +100,15 @@ func (h *WebSocketHandler) updateUserStatus(userID uint, status string) {
 		log.Printf("Failed to update user status: %v", err)
 	}
 	log.Printf("Updated user %d status to %s", userID, status)
+	return user.LastSeen.Format(time.RFC3339)
 }
 
-func (h *WebSocketHandler) broadcastSystemMessage(sourceId uint, content string) {
+func (h *WebSocketHandler) broadcastSystemMessage(sourceId uint, content string, last_seen string) {
 	msg := models.Message{
 		Content:     content,
 		SenderID:    sourceId, // system message
 		MessageType: models.MessageTypeSystem,
-		Status:      models.MessageStatusSent,
+		Status:      last_seen,
 	}
 	h.broadcast <- msg
 }
@@ -141,7 +142,7 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 		case models.MessageTypeChat:
 			log.Println("Message of type Chat")
 			msg.SenderID = client.userID
-			msg.Status = models.MessageStatusSent
+			msg.Status = "sent"
 			if err := h.messageRepo.CreateMessage(&msg); err != nil {
 				log.Printf("Failed to save message: %v", err)
 				continue
@@ -168,7 +169,7 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 			
 		case models.MessageTypeStatus:
 			log.Println("Message of type Status")
-			if(msg.Status == models.MessageStatusDelivered) {
+			if(msg.Status == "delivred") {
 				msg.MessageType = models.MessageTypeChat
 				if err := h.messageRepo.UpdateMessage(&msg); err != nil {
 					log.Printf("Failed to save message: %v", err)

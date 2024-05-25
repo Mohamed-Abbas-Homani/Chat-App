@@ -67,12 +67,12 @@ func (mr *MessageRepository) GetGroupChatHistory(groupID uint) ([]models.Message
 
 func (r *MessageRepository) MarkMessagesAsSeen(senderID, recipientID uint) error {
 	return r.db.Model(&models.Message{}).
-		Where("sender_id = ? AND recipient_id = ? AND status != ?", senderID, recipientID, models.MessageStatusSeen).
-		Updates(map[string]interface{}{"status": models.MessageStatusSeen}).Error
+		Where("sender_id = ? AND recipient_id = ? AND status != ?", senderID, recipientID, "seen").
+		Updates(map[string]interface{}{"status": "seen"}).Error
 }
 
 func (r *MessageRepository) MarkGroupMessagesAsSeen(userID, groupID uint) error {
 	return r.db.Model(&models.Message{}).
-		Where("group_id = ? AND sender_id != ? AND status != ?", groupID, userID, models.MessageStatusSeen).
-		Updates(map[string]interface{}{"status": models.MessageStatusSeen}).Error
+		Where("group_id = ? AND sender_id != ? AND status != ?", groupID, userID, "seen").
+		Updates(map[string]interface{}{"status": "seen"}).Error
 }

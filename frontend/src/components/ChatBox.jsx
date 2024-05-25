@@ -50,7 +50,7 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
     e.preventDefault();
     onSearch(searchInput);
   };
-
+  
   return (
     <TopBarContainer>
       <UserAvatar
@@ -67,6 +67,7 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
             $online={recipient.status != "Offline" || currentUser.ID == recipient.ID}
           >
             {currentUser.ID == recipient.ID ? "Online" : recipient.status}
+            {recipient.status == "Offline" && ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
           </UserStatus>
         {!recipient.Online && recipient.LastSeen && (
           <LastSeen>Last seen {humanReadableTimeDifference(recipient.LastSeen)}</LastSeen>
@@ -161,6 +162,25 @@ const ChatBox = ({ sendMessage }) => {
     }
   }, [input, recipient])
 
+  useEffect(() => {
+    if(showEmojiPicker) {
+      sendMessage({
+        message_type: "system",
+        status: "sent",
+        content: "is picking emoji...",
+        sender_id: currentUser.ID,
+        recipient_id: recipient.ID,
+      });
+    } else {
+      sendMessage({
+        message_type: "system",
+        status: "sent",
+        content: "Online",
+        sender_id: currentUser.ID,
+        recipient_id: recipient.ID,
+      });
+    }
+  }, [showEmojiPicker, recipient])
   useEffect(() => {
     if (recipient.ID) {
       resetUnseenMsg(recipient.ID);
