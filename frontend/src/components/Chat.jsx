@@ -5,13 +5,19 @@ import styled from "styled-components";
 import {
   useAddMessage,
   useAddUnseenMsg,
+  useMarkDelivredMsg,
+  useMarkSeenMsg,
   useMessages,
   useRecipient,
+  useResetUnseenMsg,
   useSetMessages,
   useSetUsers,
+  useSetWs,
   useToken,
   useUnseenMessages,
   useUser,
+  useUsers,
+  useWs,
 } from "../services/store";
 import UserList from "./UserList/UserList";
 const ChatPageContainer = styled.div`
@@ -21,6 +27,7 @@ const ChatPageContainer = styled.div`
 
 const Chat = () => {
   const setUsers = useSetUsers();
+  const users = useUsers();
   const currentUser = useUser();
   const token = useToken();
   const setMessages = useSetMessages();
@@ -30,6 +37,8 @@ const Chat = () => {
   const recipient = useRecipient();
   const [ws, setWs] = useState(null);
   const addUnseenMsg = useAddUnseenMsg();
+  const markDelivredMsg = useMarkDelivredMsg();
+  const markSeenMsg = useMarkSeenMsg();
   const fetchUsers = async () => {
     const response = await fetch("http://localhost:8080/user/", {
       method: "GET",
@@ -43,8 +52,9 @@ const Chat = () => {
 
   useEffect(() => {
     if (token) {
-      
-      const socket = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
+      const socket = !!!ws
+        ? new WebSocket(`ws://localhost:8000/ws?token=${token}`)
+        : ws;
 
       socket.onopen = () => {
         console.log("WebSocket connected");
@@ -53,20 +63,58 @@ const Chat = () => {
       setWs(socket);
       socket.onmessage = (event) => {
         const message = JSON.parse(event.data);
-        if (message.message_type == "system") fetchUsers();
-        else {
-          if (!messages.filter((m) => m.ID == message.ID).length) {
-            console.log("added");
-            addMessage(message);
+
+        switch (message.message_type) {
+          case "chat":
+            console.log("chat message : \n", message);
             if (
-              recipient.ID != message.sender_id ||
-              message.recipient_id == 0
+              message.sender_id != currentUser.ID &&
+              message.status == "sent"
             ) {
-              if (message.recipient_id) addUnseenMsg(message.sender_id);
-              else if (message.recipient_id == 0 && recipient.ID != 0)
-                addUnseenMsg(0);
+              // if (recipient.ID == message.sender_id) {
+              //   console.log("hi")
+              //   socket.send(
+              //     JSON.stringify({
+              //       message_type: "status",
+              //       status: "seen",
+              //       sender_id: recipient.ID,
+              //       recipient_id: currentUser.ID,
+              //     })
+              //   );
+              // }else {
+              message.status = "delivred";
+              addUnseenMsg(message.sender_id);
+              message.message_type = "status";
+              socket.send(JSON.stringify(message));
+              message.message_type = "chat";
+              
             }
-          }
+            if (!messages.filter((m) => m.ID == message.ID).length)
+              addMessage(message);
+            break;
+          case "system":
+            console.log("System message : \n", message);
+            setUsers([
+              ...users.map((u) => {
+                if (u.ID == message.sender_id) {
+                  u.status = message.content;
+                  console.log(u.status);
+                }
+                return u;
+              }),
+            ]);
+            break;
+
+          case "status":
+            console.log("status message : \n", message);
+            if (message.status == "delivred") {
+              markDelivredMsg(message);
+            } else {
+              markSeenMsg(message, currentUser.ID);
+            }
+            break;
+          default:
+            break;
         }
       };
 
@@ -80,32 +128,23 @@ const Chat = () => {
 
       return () => {
         if (socket) {
+          console.log("finish")
           socket.close();
         }
       };
     }
   }, [token]);
 
-  const sendMessage = (messageContent) => {
-    if (ws && messageContent && recipient) {
-      const message = {
-        content: messageContent,
-        recipient_id: recipient.ID,
-      };
-      if (message.recipient_id && message.recipient_id !== currentUser.ID)
-        addMessage({
-          ...message,
-          sender_id: currentUser.ID,
-          CreatedAt: new Date(),
-        });
-      ws.send(JSON.stringify(message));
+  const sendMessage = (msg) => {
+    if (ws) {
+      ws.send(JSON.stringify(msg));
     }
   };
 
   return (
     <ChatPageContainer style={{ display: "flex" }}>
       <UserList />
-      <ChatBox sendMessage={sendMessage} />
+      {recipient && recipient.ID && <ChatBox sendMessage={sendMessage} />}
     </ChatPageContainer>
   );
 };

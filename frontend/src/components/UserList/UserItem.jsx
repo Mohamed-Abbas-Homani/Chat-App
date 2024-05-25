@@ -18,15 +18,15 @@ const UserItem = ({ user, selected, onClick, currentUser }) => {
           {user.ID === currentUser.ID ? "(You)" : ""}
         </Username>
         {user.ID !== 0 && (
-          <UserStatus $online={user.online}>
-            {user.online ? "Online" : "Offline"}
+          <UserStatus
+            $online={user.status != "Offline" || currentUser.ID == user.ID}
+          >
+            {currentUser.ID == user.ID ? "Online" : user.status}
           </UserStatus>
         )}
       </UserInfo>
       {unseenMessages[user.ID] > 0 && (
-        <UnseenMessageCounter>
-          {unseenMessages[user.ID]}
-        </UnseenMessageCounter>
+        <UnseenMessageCounter>{unseenMessages[user.ID]}</UnseenMessageCounter>
       )}
     </UserItemContainer>
   );

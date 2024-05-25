@@ -1,6 +1,14 @@
 import React from "react";
 import styled, { css } from "styled-components";
 import ReactMarkdown from "react-markdown";
+import { IoCheckmark } from "react-icons/io5";
+import { IoCheckmarkDone } from "react-icons/io5";
+
+const StatusMark = ({ status }) => {
+  if (status === "sent") return <IoCheckmark size={"1.2em"} />;
+  else if (status === "delivred") return <IoCheckmarkDone size={"1.2em"} />;
+  else return <IoCheckmarkDone color="blue" size={"1.2em"} />;
+};
 
 const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp);
@@ -36,7 +44,7 @@ const Avatar = styled.img`
 
 const MessageContent = styled.div`
   max-width: 60%;
-  padding: 10px 23px;
+  padding: 10px 15px;
   border-radius: 10px;
   background: #f1f1f1;
   ${({ $isCurrentUser }) =>
@@ -54,12 +62,17 @@ const Username = styled.span`
   display: block;
 `;
 
+const TimestampContainer = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 5px;
+`;
+
 const Timestamp = styled.span`
   font-size: 0.8em;
   color: #888;
-  display: block;
-  text-align: right;
-  margin-top: 5px;
+  margin-right: 5px;
 `;
 
 const Message = ({ msg, isCurrentUser, user, currentUser }) => {
@@ -78,7 +91,12 @@ const Message = ({ msg, isCurrentUser, user, currentUser }) => {
       <MessageContent $isCurrentUser={isCurrentUser}>
         {!msg.recipient_id && !isCurrentUser && <Username>{username}</Username>}
         <ReactMarkdown>{msg.content}</ReactMarkdown>
-        <Timestamp>{timestamp}</Timestamp>
+        <TimestampContainer>
+          <Timestamp>{timestamp}</Timestamp>
+          {msg.sender_id === currentUser.ID && (
+            <StatusMark status={msg.status} />
+          )}
+        </TimestampContainer>
       </MessageContent>
     </MessageContainer>
   );

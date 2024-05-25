@@ -59,23 +59,6 @@ func (mh *MessageHandler) GetMessageByID(c *gin.Context) {
 	c.JSON(http.StatusOK, message)
 }
 
-// GetMessagesByUser retrieves all messages for a specific user
-func (mh *MessageHandler) GetMessagesByUser(c *gin.Context) {
-	userID, err := strconv.ParseUint(c.Param("user_id"), 10, 32)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
-		return
-	}
-
-	messages, err := mh.messageRepo.GetMessagesByUserID(uint(userID))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to get messages"})
-		return
-	}
-
-	c.JSON(http.StatusOK, messages)
-}
-
 // GetChatHistory retrieves the chat history between two users or for a group
 func (mh *MessageHandler) GetChatHistory(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("user_id"), 10, 32)

@@ -190,13 +190,22 @@ const ChatBox = ({ sendMessage }) => {
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const recipient = useRecipient();
+  console.log("entred with recipient id : ", recipient.ID)
   const currentUser = useUser();
   const users = useUsers();
   const [searchResults, setSearchResults] = useState([]);
   const resetUnseenMsg = useResetUnseenMsg();
   useEffect(() => {
+    if(recipient.ID) {
     resetUnseenMsg(recipient.ID);
-  }, [recipient?.ID]);
+    sendMessage({
+      message_type:"status",
+      status:"seen",
+      sender_id: recipient.ID,
+      recipient_id: currentUser.ID
+    })
+  }
+  }, [recipient?.ID, messages.length]);
   const filteredMessages = useMemo(() => {
     if (recipient?.ID) {
       return messages.filter(
@@ -209,11 +218,17 @@ const ChatBox = ({ sendMessage }) => {
     } else {
       return messages.filter((msg) => msg.recipient_id === 0);
     }
-  }, [messages, recipient?.ID, currentUser.ID]);
+  }, [messages.length, recipient?.ID, currentUser.ID]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    sendMessage(input);
+    sendMessage({
+      message_type:"chat",
+      sender_id:currentUser.ID,
+      recipient_id:recipient.ID,
+      content:input,
+      status:"not sent"
+    });
     setInput("");
   };
 
@@ -229,7 +244,6 @@ const ChatBox = ({ sendMessage }) => {
       );
       setSearchResults(results);
       if (results.length > 0) {
-        console.log(results);
         document
           .getElementById(results[0].ID)
           ?.scrollIntoView({ behavior: "smooth" });

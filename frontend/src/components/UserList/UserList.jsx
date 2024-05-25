@@ -21,29 +21,38 @@ const UserList = () => {
   const [showOffline, setShowOffline] = useState(true);
   const [showUnseen, setShowUnseen] = useState(false); // Add state for the unseen messages filter
 
-  // Custom sorting function
-  const sortUsers = (a, b) => {
-    // Sort by unseen messages
-    const unseenA = unseenMessages[a.ID] || 0;
-    const unseenB = unseenMessages[b.ID] || 0;
-    if (unseenA > unseenB) return -1;
-    if (unseenA < unseenB) return 1;
+// Custom sorting function
+const sortUsers = (a, b) => {
+  // Sort by unseen messages
+  const unseenA = unseenMessages[a.ID] || 0;
+  const unseenB = unseenMessages[b.ID] || 0;
+  if (unseenA > unseenB) return -1;
+  if (unseenA < unseenB) return 1;
 
-    // Then sort by online status
-    if (a.online && !b.online) return -1;
-    if (!a.online && b.online) return 1;
-
-    // Finally, sort by username
-    return a.username.localeCompare(b.username);
+  // Define status priorities
+  const statusPriority = {
+    "is typing...": 0,
+    "Online": 1,
+    "Offline": 2,
   };
 
-  const sortedUsers = users.sort(sortUsers);
+  // Sort by status priority
+  const statusA = statusPriority[a.status] ?? 3;
+  const statusB = statusPriority[b.status] ?? 3;
+  if (statusA < statusB) return -1;
+  if (statusA > statusB) return 1;
+
+  // Finally, sort by username
+  return a.username.localeCompare(b.username);
+};
+
+const sortedUsers = users.sort(sortUsers);
 
   const filteredUsers = sortedUsers.filter((user) => {
     const matchesSearch = user.username.toLowerCase().includes(
       searchTerm.toLowerCase()
     );
-    const matchesOnlineStatus = showOffline || user.online;
+    const matchesOnlineStatus = showOffline || user.status == "Online";
     const matchesUnseenStatus = !showUnseen || unseenMessages[user.ID] > 0;
     return matchesSearch && matchesOnlineStatus && matchesUnseenStatus;
   });

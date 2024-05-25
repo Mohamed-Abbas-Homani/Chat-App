@@ -8,16 +8,7 @@ export const useStore = create(
       token: null,
       users: [],
       recipient: { ID: 0, Username: "Everyone" },
-      unseenMessages: {},
-      addUnseenMsg: (id) =>
-        set({
-          unseenMessages: {
-            ...get().unseenMessages,
-            [id]: Number(get().unseenMessages[id]) + 1,
-          },
-        }),
-      resetUnseenMsg: (id) =>
-        set({ unseenMessages: { ...get().unseenMessages, [id]: 0 } }),
+
       setLogin: (user, token) => set({ user, token }),
       setLogout: () => set({ user: null, token: null }),
       setUsers: (users) => set({ users }),
@@ -32,19 +23,46 @@ export const useStore = create(
   )
 );
 
-export const useStoreWithoutStorage = create(
-  persist(
-    (set, get) => ({
-      messages: [],
-      setMessages: (messages) => set({ messages }),
-      addMessage: (message) => set({ messages: [...get().messages, message] }),
+export const useStoreWithoutStorage = create((set, get) => ({
+  ws: null,
+  setWs: (ws) => set({ ws }),
+  unseenMessages: {},
+  addUnseenMsg: (id) =>
+    set({
+      unseenMessages: {
+        ...get().unseenMessages,
+        [id]: Number(get().unseenMessages[id]) + 1,
+      },
     }),
-    {
-      name: "chat-app2",
-      storage: createJSONStorage(() => localStorage),
-    }
-  )
-);
+  resetUnseenMsg: (id) =>
+    set({ unseenMessages: { ...get().unseenMessages, [id]: 0 } }),
+  messages: [],
+  setMessages: (messages) => set({ messages }),
+  addMessage: (message) => set({ messages: [...get().messages, message] }),
+  markDelivredMsg: (message) =>
+    set({
+      messages: [
+        ...get().messages.map((m) => {
+          if (m.ID == message.ID) {
+            m.status = "delivred";
+          }
+          return m;
+        }),
+      ],
+    }),
+
+  markSeenMsg: (message, currendID) => set({messages: [
+    ...get().messages.map((m) => {
+      if (
+        m.sender_id == message.recipient_id &&
+        m.recipient_id == message.sender_id
+      ) {
+        m.status = "seen";
+      }
+      return m;
+    }),
+  ]})
+}));
 
 export const useUser = () => useStore((state) => state.user);
 export const useToken = () =>
@@ -62,7 +80,15 @@ export const useAddMessage = () =>
 export const useRecipient = () => useStore((state) => state.recipient);
 export const useSetRecipient = () => useStore((state) => state.setRecipient);
 export const useUnseenMessages = () =>
-  useStore((state) => state.unseenMessages);
-export const useAddUnseenMsg = () => useStore((state) => state.addUnseenMsg);
+  useStoreWithoutStorage((state) => state.unseenMessages);
+export const useAddUnseenMsg = () =>
+  useStoreWithoutStorage((state) => state.addUnseenMsg);
 export const useResetUnseenMsg = () =>
-  useStore((state) => state.resetUnseenMsg);
+  useStoreWithoutStorage((state) => state.resetUnseenMsg);
+export const useMarkDelivredMsg = () =>
+  useStoreWithoutStorage((state) => state.markDelivredMsg);
+export const useMarkSeenMsg = () =>
+  useStoreWithoutStorage((state) => state.markSeenMsg);
+export const useWs = () => useStoreWithoutStorage((state) => state.ws);
+
+export const useSetWs = () => useStoreWithoutStorage((state) => state.setWs);

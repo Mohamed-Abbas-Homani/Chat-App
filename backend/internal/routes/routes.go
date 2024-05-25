@@ -47,7 +47,6 @@ func SetupRoutes(router *gin.Engine, cfg *config.AppConfig, db *gorm.DB) {
 	{
 		messageRoutes.POST("/", messageHandler.SendMessage)
 		messageRoutes.GET("/:id", messageHandler.GetMessageByID)
-		messageRoutes.GET("/user/:user_id", messageHandler.GetMessagesByUser)
 		messageRoutes.GET("/chat/:user_id", messageHandler.GetChatHistory)
 		messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
 	}

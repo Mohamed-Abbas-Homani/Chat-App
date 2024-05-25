@@ -62,7 +62,7 @@ export const UserListContainer = styled.div`
 
 export const SearchContainer = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: space-around;
   align-items: center;
   margin-bottom: 20px;
 `;
@@ -101,7 +101,7 @@ export const Checkmark = styled.span`
   height: 20px;
   background-color: #f0f2f5;
   border-radius: 50%;
-  margin: 8px;
+  margin: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
