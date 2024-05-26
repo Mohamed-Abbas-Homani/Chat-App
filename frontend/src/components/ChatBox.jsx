@@ -50,11 +50,13 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
     e.preventDefault();
     onSearch(searchInput);
   };
-  
+
   return (
     <TopBarContainer>
       <UserAvatar
-        src={`http://localhost:8080/${recipient.ProfilePicture || "uploads/default.jpg"}`}
+        src={`http://localhost:8080/${
+          recipient.ProfilePicture || "uploads/default.jpg"
+        }`}
         alt="Profile"
         onClick={onAvatarClick}
       />
@@ -63,17 +65,30 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
           {recipient.username}
           {currentUser.ID === recipient.ID ? "(You)" : ""}
         </Username>
-       <UserStatus
-            $online={recipient.status != "Offline" || currentUser.ID == recipient.ID}
-          >
-            {currentUser.ID == recipient.ID ? "Online" : recipient.status}
-            {recipient.status == "Offline" && ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
-          </UserStatus>
+        <UserStatus
+          $online={
+            recipient.status != "Offline" || currentUser.ID == recipient.ID
+          }
+        >
+          {currentUser.ID == recipient.ID ? "Online" : recipient.status}
+          {recipient.status == "Offline" &&
+            ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
+        </UserStatus>
         {!recipient.Online && recipient.LastSeen && (
-          <LastSeen>Last seen {humanReadableTimeDifference(recipient.LastSeen)}</LastSeen>
+          <LastSeen>
+            Last seen {humanReadableTimeDifference(recipient.LastSeen)}
+          </LastSeen>
         )}
       </UserInfo>
-      <form onSubmit={handleSearch} style={{ marginLeft: "auto", display: "flex", alignItems: "center", marginRight: "20px" }}>
+      <form
+        onSubmit={handleSearch}
+        style={{
+          marginLeft: "auto",
+          display: "flex",
+          alignItems: "center",
+          marginRight: "20px",
+        }}
+      >
         <input
           type="text"
           placeholder="Search messages"
@@ -94,7 +109,9 @@ const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
   useEffect(() => {
     const unseenCount = unseenMessages[recipientId];
     if (unseenCount > 0) {
-      document.getElementById(messages[messages.length - unseenCount].ID).scrollIntoView({ behavior: "smooth" });
+      document
+        .getElementById(messages[messages.length - unseenCount].ID)
+        .scrollIntoView({ behavior: "smooth" });
     } else if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
     }
@@ -106,7 +123,13 @@ const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
         const isCurrentUser = msg.sender_id === currentUser.ID;
         const user = users.find((u) => u.ID === msg.sender_id);
         return (
-          <Message key={msg.ID} msg={msg} isCurrentUser={isCurrentUser} user={user} currentUser={currentUser} />
+          <Message
+            key={msg.ID}
+            msg={msg}
+            isCurrentUser={isCurrentUser}
+            user={user}
+            currentUser={currentUser}
+          />
         );
       })}
       <div ref={messagesEndRef} />
@@ -114,11 +137,27 @@ const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
   );
 };
 
-const Form = ({ input, setInput, handleSubmit, showEmojiPicker, setShowEmojiPicker, handleSelectEmoji }) => (
+const Form = ({
+  input,
+  setInput,
+  handleSubmit,
+  showEmojiPicker,
+  setShowEmojiPicker,
+  handleSelectEmoji,
+}) => (
   <FormWrapper onSubmit={handleSubmit}>
-    <TextArea placeholder="Type a message" value={input} onChange={(e) => setInput(e.target.value)} rows={1} />
-    <Button type="submit" disabled={showEmojiPicker}>Send</Button>
-    <EmojiButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>😀</EmojiButton>
+    <TextArea
+      placeholder="Type a message"
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+      rows={1}
+    />
+    <Button type="submit" disabled={showEmojiPicker}>
+      Send
+    </Button>
+    <EmojiButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+      😀
+    </EmojiButton>
     {showEmojiPicker && <EmojiPicker onSelect={handleSelectEmoji} />}
   </FormWrapper>
 );
@@ -127,7 +166,11 @@ const ProfilePictureModal = ({ show, onClose, src }) => (
   <Modal $show={show}>
     <ModalContent>
       <ModalClose onClick={onClose}>&times;</ModalClose>
-      <img src={src} alt="Profile" style={{ width: "100%", borderRadius: "5px" }} />
+      <img
+        src={src}
+        alt="Profile"
+        style={{ width: "100%", borderRadius: "5px" }}
+      />
     </ModalContent>
   </Modal>
 );
@@ -143,7 +186,7 @@ const ChatBox = ({ sendMessage }) => {
   const resetUnseenMsg = useResetUnseenMsg();
 
   useEffect(() => {
-    if(input) {
+    if (input) {
       sendMessage({
         message_type: "system",
         status: "sent",
@@ -160,10 +203,10 @@ const ChatBox = ({ sendMessage }) => {
         recipient_id: recipient.ID,
       });
     }
-  }, [input, recipient])
+  }, [input, recipient]);
 
   useEffect(() => {
-    if(showEmojiPicker) {
+    if (showEmojiPicker) {
       sendMessage({
         message_type: "system",
         status: "sent",
@@ -180,7 +223,7 @@ const ChatBox = ({ sendMessage }) => {
         recipient_id: recipient.ID,
       });
     }
-  }, [showEmojiPicker, recipient])
+  }, [showEmojiPicker, recipient]);
   useEffect(() => {
     if (recipient.ID) {
       resetUnseenMsg(recipient.ID);
@@ -197,8 +240,10 @@ const ChatBox = ({ sendMessage }) => {
     if (recipient.ID) {
       return messages.filter(
         (msg) =>
-          (msg.sender_id === currentUser.ID && msg.recipient_id === recipient.ID) ||
-          (msg.sender_id === recipient.ID && msg.recipient_id === currentUser.ID)
+          (msg.sender_id === currentUser.ID &&
+            msg.recipient_id === recipient.ID) ||
+          (msg.sender_id === recipient.ID &&
+            msg.recipient_id === currentUser.ID)
       );
     } else {
       return messages.filter((msg) => msg.recipient_id === 0);
@@ -229,7 +274,9 @@ const ChatBox = ({ sendMessage }) => {
       );
       if (results.length > 0) {
         const firstResult = results[0];
-        document.getElementById(firstResult.ID)?.scrollIntoView({ behavior: "smooth" });
+        document
+          .getElementById(firstResult.ID)
+          ?.scrollIntoView({ behavior: "smooth" });
         const element = document.getElementById(firstResult.ID);
         element.style.filter = "brightness(0.7)";
         setTimeout(() => {
@@ -242,9 +289,18 @@ const ChatBox = ({ sendMessage }) => {
   return (
     <ChatContainer>
       {recipient && (
-        <TopBar recipient={recipient} onAvatarClick={() => setShowProfileModal(true)} onSearch={handleSearch} />
+        <TopBar
+          recipient={recipient}
+          onAvatarClick={() => setShowProfileModal(true)}
+          onSearch={handleSearch}
+        />
       )}
-      <MessagesContainer messages={filteredMessages} currentUser={currentUser} users={users} recipientId={recipient.ID} />
+      <MessagesContainer
+        messages={filteredMessages}
+        currentUser={currentUser}
+        users={users}
+        recipientId={recipient.ID}
+      />
       <Form
         input={input}
         setInput={setInput}
@@ -257,7 +313,9 @@ const ChatBox = ({ sendMessage }) => {
         <ProfilePictureModal
           show={showProfileModal}
           onClose={() => setShowProfileModal(false)}
-          src={`http://localhost:8080/${recipient.ProfilePicture || "uploads/default.jpg"}`}
+          src={`http://localhost:8080/${
+            recipient.ProfilePicture || "uploads/default.jpg"
+          }`}
         />
       )}
     </ChatContainer>
