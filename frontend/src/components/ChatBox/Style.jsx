@@ -102,7 +102,6 @@ export const FormWrapper = styled.div`
   position: relative;
 `;
 
-
 export const TextArea = styled.textarea`
   flex-grow: 1;
   padding: 10px;
@@ -110,7 +109,6 @@ export const TextArea = styled.textarea`
   border: 1px solid #ccc;
   resize: none;
   outline: none;
-  
   margin-right: 10px;
   height: 40px;
   &:focus {
@@ -124,21 +122,23 @@ export const EmojiPickerWrapper = styled.div`
   position: absolute;
   right: 20px;
   bottom: 70px;
-  width: 350px;
+  width: 89%;
+  max-width: 550px;
   background: white;
   border: 1px solid #ddd;
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   padding: 10px;
   z-index: 1000;
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 `;
 
 export const CategoryWrapper = styled.div`
   display: flex;
   justify-content: space-between;
+  flex-wrap: wrap;
   margin-bottom: 10px;
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 `;
 
 export const CategoryButton = styled.button`
@@ -152,7 +152,7 @@ export const CategoryButton = styled.button`
   &:hover {
     background-color: ${(props) => (props.$active ? "#45a049" : "#e0e0e0")};
   }
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 `;
 
 export const EmojisWrapper = styled.div`
@@ -160,7 +160,7 @@ export const EmojisWrapper = styled.div`
   flex-wrap: wrap;
   max-height: 200px;
   overflow-y: scroll;
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 `;
 
 export const EmojiButton = styled.div`
@@ -169,18 +169,18 @@ export const EmojiButton = styled.div`
   align-items: center;
   background-color: #4caf5090;
   margin: 5px;
-  width: 40px;
-  height: 40px;
+  width: ${(props) => (props.$isKaomoji ? "100px" : "40px")};
+  height: ${(props) => (props.$isKaomoji ? "100px" : "40px")};
   padding: 10px;
   border-radius: 5px;
   border: none;
   color: white;
   cursor: pointer;
-  font-size: 1.5em;
+  font-size: ${(props) => (props.$isKaomoji ? "1em" : "1.5em")};
   &:hover {
     filter: brightness(1.1);
   }
-  user-select: none; /* Prevent text selection */
+  user-select: none;
 `;
 
 import { FaSearch } from "react-icons/fa";
@@ -322,11 +322,10 @@ export const ArrowButtonWrapper = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  margin-right: 10px; // Adjust margin as needed
+  margin-right: 10px;
 `;
 
 export const ArrowButton = styled.button`
-  
   margin: 7px;
   color: #333;
   background: none;
