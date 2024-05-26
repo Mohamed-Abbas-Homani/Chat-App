@@ -24,7 +24,7 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
     <TopBarContainer>
       <UserAvatar
         src={`http://localhost:8080/${
-          recipient.ProfilePicture || "uploads/default.jpg"
+          recipient.profile_picture || "uploads/default.jpg"
         }`}
         alt="Profile"
         onClick={onAvatarClick}
@@ -43,11 +43,6 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
           {recipient.status === "Offline" &&
             ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
         </UserStatus>
-        {!recipient.Online && recipient.LastSeen && (
-          <LastSeen>
-            Last seen {humanReadableTimeDifference(recipient.LastSeen)}
-          </LastSeen>
-        )}
       </UserInfo>
       <form
         onSubmit={handleSearch}
