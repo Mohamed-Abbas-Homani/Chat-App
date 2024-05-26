@@ -33,8 +33,9 @@ func SetupRoutes(router *gin.Engine, cfg *config.AppConfig, db *gorm.DB) {
 		authRoutes.POST("/login", authHandler.Login)
 	}
 
-	// User routes
+	// User routes with AuthMiddleware
 	userRoutes := router.Group("/user")
+	userRoutes.Use(middlewares.AuthMiddleware(cfg))
 	{
 		userRoutes.GET("/", userHandler.GetAllUsers)
 		userRoutes.GET("/:id", userHandler.GetUserByID)
@@ -42,8 +43,9 @@ func SetupRoutes(router *gin.Engine, cfg *config.AppConfig, db *gorm.DB) {
 		userRoutes.DELETE("/:id", userHandler.DeleteUser)
 	}
 
-	// Message routes
+	// Message routes with AuthMiddleware
 	messageRoutes := router.Group("/message")
+	messageRoutes.Use(middlewares.AuthMiddleware(cfg))
 	{
 		messageRoutes.POST("/", messageHandler.SendMessage)
 		messageRoutes.GET("/:id", messageHandler.GetMessageByID)
@@ -51,8 +53,9 @@ func SetupRoutes(router *gin.Engine, cfg *config.AppConfig, db *gorm.DB) {
 		messageRoutes.DELETE("/:id", messageHandler.DeleteMessage)
 	}
 
-	// Group routes
+	// Group routes with AuthMiddleware
 	groupRoutes := router.Group("/group")
+	groupRoutes.Use(middlewares.AuthMiddleware(cfg))
 	{
 		groupRoutes.POST("/", groupHandler.CreateGroup)
 		groupRoutes.GET("/:id", groupHandler.GetGroupByID)
