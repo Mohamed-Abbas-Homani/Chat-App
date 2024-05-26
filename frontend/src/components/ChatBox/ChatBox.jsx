@@ -6,9 +6,7 @@ import {
   useUser,
   useUsers,
 } from "../../services/store";
-import {
-  ChatContainer,
-} from "./Style";
+import { ChatContainer } from "./Style";
 import TopBar from "./TopBar";
 import MessagesContainer from "./MessagesContainer";
 import Form from "./Form";
@@ -71,14 +69,16 @@ const ChatBox = ({ sendMessage }) => {
   };
 
   const handleSubmit = () => {
-    sendMessage({
-      message_type: "chat",
-      sender_id: currentUser.ID,
-      recipient_id: recipient.ID,
-      content: input,
-      status: "not sent",
-    });
-    setInput("");
+    if (input) {
+      sendMessage({
+        message_type: "chat",
+        sender_id: currentUser.ID,
+        recipient_id: recipient.ID,
+        content: input,
+        status: "not sent",
+      });
+      setInput("");
+    }
   };
 
   const handleSelectEmoji = (emoji) => {
@@ -109,7 +109,11 @@ const ChatBox = ({ sendMessage }) => {
   useEffect(updateEmojiPickerStatus, [showEmojiPicker, recipient]);
   useEffect(updateRecipientStatus, [recipient.ID, messages.length]);
 
-  const filteredMessages = useMemo(getFilteredMessages, [messages.length, recipient.ID, currentUser.ID]);
+  const filteredMessages = useMemo(getFilteredMessages, [
+    messages.length,
+    recipient.ID,
+    currentUser.ID,
+  ]);
 
   return (
     <ChatContainer>

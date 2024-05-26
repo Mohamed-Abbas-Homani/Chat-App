@@ -99,8 +99,6 @@ export const ButtonSearch = styled.button`
   }
 `;
 
-
-
 export const EmojiPickerWrapper = styled.div`
   display: flex;
   flex-direction: column;
