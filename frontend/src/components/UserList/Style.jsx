@@ -71,8 +71,12 @@ export const SearchBar = styled.input`
   flex-grow: 1;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  outline: none;
+  border: none;
   margin-bottom: 10px;
+  background: #f0f2f5;
+box-shadow: inset 3px 3px 3px #ccced0,
+            inset -3px -3px 3px #ffffff;
 `;
 
 export const FilterContainer = styled.div`

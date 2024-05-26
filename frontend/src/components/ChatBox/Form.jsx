@@ -1,7 +1,8 @@
 import React from "react";
-import { FormWrapper, TextArea, Button, EmojiButton } from "./Style";
+import { FaPaperPlane, FaShare } from "react-icons/fa";
+import { FormWrapper, TextArea, SendButton, EmojiButtonWrapper } from "./Style";
 import EmojiPicker from "./EmojiPicker";
-
+import { IoMdSend } from "react-icons/io";
 const Form = ({
   input,
   setInput,
@@ -17,13 +18,17 @@ const Form = ({
       onChange={(e) => setInput(e.target.value)}
       rows={1}
     />
-    <Button onClick={handleSubmit} disabled={showEmojiPicker}>
-      Send
-    </Button>
-    <EmojiButton onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+    <EmojiButtonWrapper onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
       😀
-    </EmojiButton>
-    {showEmojiPicker && <EmojiPicker onSelect={handleSelectEmoji} />}
+    </EmojiButtonWrapper>
+    {showEmojiPicker && (
+ 
+        <EmojiPicker onSelect={handleSelectEmoji} />
+    
+    )}
+    <SendButton onClick={handleSubmit} disabled={!input.trim()}>
+      <IoMdSend size={"1.2em"} />
+    </SendButton>
   </FormWrapper>
 );
 

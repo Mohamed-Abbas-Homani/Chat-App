@@ -11,7 +11,7 @@ const NavBarContainer = styled.nav`
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 10px 20px;
+  padding: 8px 13px;
   background-color: #4caf50;
   color: white;
 `;

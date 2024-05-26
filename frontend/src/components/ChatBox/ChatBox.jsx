@@ -3,6 +3,7 @@ import {
   useMessages,
   useRecipient,
   useResetUnseenMsg,
+  useUpdateMsg,
   useUser,
   useUsers,
 } from "../../services/store";
@@ -17,11 +18,13 @@ const ChatBox = ({ sendMessage }) => {
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
+  const [searchResult, setSearchResult] = useState({ results: [], pos: 0 });
   const recipient = useRecipient();
   const currentUser = useUser();
   const users = useUsers();
   const resetUnseenMsg = useResetUnseenMsg();
-
+  const [searchInput, setSearchInput] = useState("");
+  const updateMsg = useUpdateMsg();
   const updateTypingStatus = () => {
     sendMessage({
       message_type: "system",
@@ -86,22 +89,39 @@ const ChatBox = ({ sendMessage }) => {
     setShowEmojiPicker(false);
   };
 
+  useEffect(() => {
+    if (searchResult.results.length)
+      goToMessage(searchResult.results[searchResult.pos]);
+  }, [searchResult.pos]);
+
+  const goToMessage = (message) => {
+    const lastContent = message.content;
+    const arrowRight = "➡️";
+    const arrowLeft = "⬅️";
+    message = {
+      ...message,
+      content: message.content.replace(
+        searchInput,
+        `${arrowRight}**${searchInput}**${arrowLeft}`
+      ),
+    };
+    updateMsg(message);
+    document.getElementById(message.ID)?.scrollIntoView({ behavior: "smooth" });
+    const element = document.getElementById(message.ID);
+    element.style.filter = "brightness(0.8)";
+    setTimeout(() => {
+      element.style.filter = "brightness(1)";
+      message = { ...message, content: lastContent };
+      updateMsg(message);
+    }, 1000);
+  };
+
   const handleSearch = (searchTerm) => {
     if (searchTerm.trim()) {
       const results = filteredMessages.filter((msg) =>
         msg.content.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      if (results.length > 0) {
-        const firstResult = results[0];
-        document
-          .getElementById(firstResult.ID)
-          ?.scrollIntoView({ behavior: "smooth" });
-        const element = document.getElementById(firstResult.ID);
-        element.style.filter = "brightness(0.7)";
-        setTimeout(() => {
-          element.style.filter = "brightness(1)";
-        }, 2000);
-      }
+      setSearchResult({ results, pos: results.length - 1 });
     }
   };
 
@@ -119,9 +139,13 @@ const ChatBox = ({ sendMessage }) => {
     <ChatContainer>
       {recipient && (
         <TopBar
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
           recipient={recipient}
           onAvatarClick={() => setShowProfileModal(true)}
           onSearch={handleSearch}
+          setSearchResult={setSearchResult}
+          searchResult={searchResult}
         />
       )}
       <MessagesContainer
@@ -143,7 +167,7 @@ const ChatBox = ({ sendMessage }) => {
           show={showProfileModal}
           onClose={() => setShowProfileModal(false)}
           src={`http://localhost:8080/${
-            recipient.ProfilePicture || "uploads/default.jpg"
+            recipient.profile_picture || "uploads/default.jpg"
           }`}
         />
       )}

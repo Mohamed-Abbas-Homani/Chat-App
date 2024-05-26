@@ -1,23 +1,43 @@
 import React, { useState } from "react";
 import { useUser } from "../../services/store";
 import humanReadableTimeDifference from "../../helpers/timeHelper";
+import { FaSearch, FaArrowUp, FaArrowDown, FaTimes } from "react-icons/fa"; // Import arrow icons
 import {
   TopBarContainer,
   UserAvatar,
   UserInfo,
   Username,
   UserStatus,
-  LastSeen,
-  ButtonSearch,
+  SearchIcon,
+  SearchForm,
+  SearchInput,
+  IconButton,
+  ArrowButtonWrapper,
+  ArrowButton, // New styled component for arrow buttons
 } from "./Style";
-
-const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
+import { IoIosArrowDown } from "react-icons/io";
+import { IoIosArrowUp } from "react-icons/io";
+const TopBar = ({
+  recipient,
+  onAvatarClick,
+  onSearch,
+  setSearchResult,
+  searchResult,
+  searchInput,
+  setSearchInput
+}) => {
   const currentUser = useUser();
-  const [searchInput, setSearchInput] = useState("");
+  const [searchVisible, setSearchVisible] = useState(false);
 
   const handleSearch = (e) => {
     e.preventDefault();
     onSearch(searchInput);
+  };
+
+  const toggleSearch = () => {
+    setSearchVisible(!searchVisible);
+    setSearchInput("");
+    setSearchResult({results:[], pos:0})
   };
 
   return (
@@ -44,24 +64,54 @@ const TopBar = ({ recipient, onAvatarClick, onSearch }) => {
             ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
         </UserStatus>
       </UserInfo>
-      <form
-        onSubmit={handleSearch}
-        style={{
-          marginLeft: "auto",
-          display: "flex",
-          alignItems: "center",
-          marginRight: "20px",
-        }}
-      >
-        <input
-          type="text"
-          placeholder="Search messages"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          style={{ padding: "5px", marginRight: "5px", borderRadius: "5px" }}
-        />
-        <ButtonSearch type="submit">Search</ButtonSearch>
-      </form>
+      {!searchVisible && <SearchIcon onClick={toggleSearch} />}
+      {searchVisible && (
+        <SearchForm onSubmit={handleSearch}>
+        {!!searchResult.results.length && <ArrowButtonWrapper>
+            <ArrowButton
+              type="button"
+              onClick={() => {
+                setSearchResult({
+                  ...searchResult,
+                  pos: searchResult.results[searchResult.pos - 1]
+                    ? searchResult.pos - 1
+                    : searchResult.pos ,
+                });
+              }}
+            >
+              <IoIosArrowUp />
+            </ArrowButton>
+            <small style={{ position:"absolute"}}>
+              { searchResult.pos + 1}
+            </small>
+            <ArrowButton
+              type="button"
+              onClick={() => {
+                setSearchResult({
+                  ...searchResult,
+                  pos: searchResult.results[searchResult.pos + 1]
+                    ? searchResult.pos + 1
+                    : searchResult.pos ,
+                });
+              }}
+            >
+              <IoIosArrowDown />
+            </ArrowButton>
+          </ArrowButtonWrapper>}
+          <SearchInput
+            type="text"
+            placeholder="Search messages"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+          <IconButton type="submit">
+            <FaSearch />
+          </IconButton>
+          <IconButton type="button" onClick={toggleSearch}>
+            <FaTimes />
+          </IconButton>
+        </SearchForm>
+      )}
     </TopBarContainer>
   );
 };

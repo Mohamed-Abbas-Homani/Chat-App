@@ -77,6 +77,13 @@ export const useStoreWithoutStorage = create((set, get) => ({
         }),
       ],
     }),
+
+  updateMsg: (msg) => set({messages: [...get().messages.map(m => {
+    if(m.ID == msg.ID){
+      m.content = msg.content
+    }
+    return m
+  })]})
 }));
 
 export const useUser = () => useStore((state) => state.user);
@@ -109,3 +116,4 @@ export const useMarkSeenMsg = () =>
 export const useWs = () => useStoreWithoutStorage((state) => state.ws);
 
 export const useSetWs = () => useStoreWithoutStorage((state) => state.setWs);
+export const useUpdateMsg = () => useStoreWithoutStorage((state) => state.updateMsg);
