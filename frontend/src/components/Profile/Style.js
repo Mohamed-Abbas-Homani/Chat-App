@@ -26,9 +26,20 @@ export const Form = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
 `;
 
 export const Input = styled.input`
+  margin-bottom: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+`;
+
+export const TextArea = styled.textarea`
   margin-bottom: 10px;
   padding: 10px;
   border-radius: 5px;

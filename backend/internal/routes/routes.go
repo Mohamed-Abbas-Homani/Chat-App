@@ -41,6 +41,7 @@ func SetupRoutes(router *gin.Engine, cfg *config.AppConfig, db *gorm.DB) {
 		userRoutes.GET("/:id", userHandler.GetUserByID)
 		userRoutes.PUT("/:id", userHandler.UpdateUser)
 		userRoutes.DELETE("/:id", userHandler.DeleteUser)
+		userRoutes.POST("/upload", userHandler.UploadFile) // New route for uploading files
 	}
 
 	// Message routes with AuthMiddleware

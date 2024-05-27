@@ -176,3 +176,46 @@ func (uh *UserHandler) GetUserByEmail(c *gin.Context) {
 
 	c.JSON(http.StatusOK, user)
 }
+
+// UploadFile handles uploading any type of file and storing it in the uploads/files/ directory
+func (uh *UserHandler) UploadFile(c *gin.Context) {
+	r := c.Request
+	r.ParseMultipartForm(10 << 20) // 10 MB max file size
+
+	// Retrieve the file from the request
+	file, err := c.FormFile("file")
+	if err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file"})
+			return
+	}
+
+	// Create the uploads/files directory if it doesn't exist
+	uploadPath := "uploads/files"
+	if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating upload directory"})
+			return
+	}
+
+	// Save the file to the server
+	tempFile, err := os.Create(filepath.Join(uploadPath, file.Filename))
+	if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+			return
+	}
+	defer tempFile.Close()
+	
+	fileContent, err := file.Open()
+	if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error opening the file"})
+			return
+	}
+	defer fileContent.Close()
+	
+	_, err = io.Copy(tempFile, fileContent)
+	if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+			return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "filePath": tempFile.Name()})
+}

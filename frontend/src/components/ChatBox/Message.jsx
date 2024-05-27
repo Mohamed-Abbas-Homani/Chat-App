@@ -3,6 +3,7 @@ import styled, { css, keyframes } from "styled-components";
 import ReactMarkdown from "react-markdown";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import { FaTrash } from "react-icons/fa";
+import { ImageComponent, VideoComponent, AudioComponent, FileComponent } from "./MediaComponents";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
 
 const fadeInFromLeft = keyframes`
@@ -12,7 +13,7 @@ const fadeInFromLeft = keyframes`
   }
   to {
     opacity: 1;
-    transform: translateY(0) translateX(0) rotate(0deg);
+    transform: translateY(0) translateX(0deg);
   }
 `;
 
@@ -129,6 +130,21 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
   const username = user?.username;
   const timestamp = formatTimestamp(msg.CreatedAt);
   const [showTrash, setShowTrash] = useState(false);
+
+  const renderMedia = (filePath, mediaType) => {
+    const fileUrl = `http://localhost:8080/${filePath}`;
+    switch (mediaType) {
+      case "image/*":
+        return <ImageComponent src={fileUrl} />;
+      case "video/*":
+        return <VideoComponent src={fileUrl} />;
+      case "audio/*":
+        return <AudioComponent src={fileUrl} />;
+      default:
+        return <FileComponent src={fileUrl} />;
+    }
+  };
+
   return (
     <MessageContainer
       $isCurrentUser={isCurrentUser}
@@ -142,9 +158,10 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
       />
       <MessageContent $isCurrentUser={isCurrentUser}>
         {!msg.recipient_id && !isCurrentUser && <Username>{username}</Username>}
-        <ReactMarkdown>{msg.content}</ReactMarkdown>
+        {msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>}
+        {msg.file_path && renderMedia(msg.file_path, msg.media_type)}
         <TimestampContainer>
-          {msg.sender_id == currentUser.ID && showTrash && (
+          {msg.sender_id === currentUser.ID && showTrash && (
             <FaTrash
               color="gray"
               size={"0.8em"}
@@ -153,11 +170,11 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
                 deleteMessage(msg.ID);
                 sendMessage({
                   recipient_id: msg.sender_id,
-                  sender_id:msg.recipient_id,
-                  ID:msg.ID,
-                  message_type:"status",
-                  status:"deleted"
-                })
+                  sender_id: msg.recipient_id,
+                  ID: msg.ID,
+                  message_type: "status",
+                  status: "deleted",
+                });
               }}
             />
           )}
@@ -165,7 +182,7 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
           {msg.sender_id === currentUser.ID && !showTrash && (
             <StatusMark status={msg.status}>
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
-              {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
+              {msg.status === "delivered" && <IoCheckmarkDone size={"1.2em"} />}
               {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}
             </StatusMark>
           )}

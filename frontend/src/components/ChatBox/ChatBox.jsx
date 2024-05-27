@@ -162,6 +162,7 @@ const ChatBox = ({ sendMessage }) => {
         showEmojiPicker={showEmojiPicker}
         setShowEmojiPicker={setShowEmojiPicker}
         handleSelectEmoji={handleSelectEmoji}
+        sendMessage={sendMessage}
       />
       {recipient && (
         <ProfilePictureModal

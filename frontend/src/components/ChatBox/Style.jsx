@@ -338,3 +338,38 @@ export const ArrowButton = styled.button`
     transform: scale(1.1);
   }
 `;
+
+
+export const FileButtonWrapper = styled.div`
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  position: relative;
+`;
+
+export const HiddenFileInput = styled.input`
+  display: none;
+`;
+
+export const FileTypeMenu = styled.div`
+  position: absolute;
+  bottom: 65px;
+  left: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+`;
+
+export const FileTypeOption = styled.div`
+text-align: center;
+  padding: 10px;
+  cursor: pointer;
+  &:hover {
+    background: #f0f0f0;
+  }
+`;
