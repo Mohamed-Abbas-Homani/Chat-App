@@ -3,7 +3,7 @@ import { useUnseenMessages } from "../../services/store";
 import Message from "./Message";
 import { MessagesWrapper } from "./Style";
 
-const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
+const MessagesContainer = ({ messages, currentUser, users, recipientId, sendMessage }) => {
   const messagesEndRef = useRef(null);
   const unseenMessages = useUnseenMessages();
 
@@ -33,6 +33,7 @@ const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
             isCurrentUser={isCurrentUser}
             user={user}
             currentUser={currentUser}
+            sendMessage={sendMessage}
           />
         );
       })}

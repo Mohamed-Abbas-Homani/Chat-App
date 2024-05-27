@@ -7,6 +7,7 @@ import useFetchUsers from "../hooks/useFetchUsers";
 import {
   useAddMessage,
   useAddUnseenMsg,
+  useDeleteMsg,
   useMarkDelivredMsg,
   useMarkSeenMsg,
   useMessages,
@@ -38,7 +39,7 @@ const Chat = () => {
   const { fetchUsers } = useFetchUsers();
   const { ws, sendMessage, closeWebSocket } = useWebSocket(token);
   const updateRecipient = useUpdateRecipient()
-
+  const deleteMsg = useDeleteMsg()
   useEffect(() => {
     if (ws) {
       ws.onmessage = (event) => {
@@ -97,7 +98,11 @@ const Chat = () => {
   };
 
   const handleStatusMessage = (message) => {
-    if (message.status === "delivred") {
+    if (message.status === "deleted"){
+      console.log("delted", message)
+      deleteMsg(message.ID)
+    }
+    else  if (message.status === "delivred") {
       markDelivredMsg(message);
     } else {
       markSeenMsg(message, currentUser.ID);

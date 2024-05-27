@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import ReactMarkdown from "react-markdown";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
+import { FaTrash } from "react-icons/fa";
+import useDeleteMessage from "../../hooks/useDeleteMessage";
 
 const fadeInFromLeft = keyframes`
   from {
@@ -119,28 +121,48 @@ const Timestamp = styled.span`
   margin-right: 5px;
 `;
 
-const Message = ({ msg, isCurrentUser, user, currentUser }) => {
+const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
+  const { deleteMessage } = useDeleteMessage();
   const avatarUrl = isCurrentUser
     ? currentUser.profile_picture
     : user?.profile_picture;
   const username = user?.username;
   const timestamp = formatTimestamp(msg.CreatedAt);
-
+  const [showTrash, setShowTrash] = useState(false);
   return (
-    <MessageContainer $isCurrentUser={isCurrentUser} id={msg.ID}>
+    <MessageContainer
+      $isCurrentUser={isCurrentUser}
+      id={msg.ID}
+      onMouseOver={() => setShowTrash(true)}
+      onMouseLeave={() => setShowTrash(false)}
+    >
       <Avatar
-        src={`http://192.168.1.5:8080/${avatarUrl ?? "uploads/default.jpg"}`}
+        src={`http://localhost:8080/${avatarUrl ?? "uploads/default.jpg"}`}
         alt={username}
       />
       <MessageContent $isCurrentUser={isCurrentUser}>
         {!msg.recipient_id && !isCurrentUser && <Username>{username}</Username>}
-        <ReactMarkdown>
-          {/* {msg.content.replace(/(?:\r\n|\r|\n)/g, "  \n")} */}
-          {msg.content}
-        </ReactMarkdown>
+        <ReactMarkdown>{msg.content}</ReactMarkdown>
         <TimestampContainer>
+          {msg.sender_id == currentUser.ID && showTrash && (
+            <FaTrash
+              color="gray"
+              size={"0.8em"}
+              style={{ marginRight: "5px", cursor: "pointer" }}
+              onClick={() => {
+                deleteMessage(msg.ID);
+                sendMessage({
+                  recipient_id: msg.sender_id,
+                  sender_id:msg.recipient_id,
+                  ID:msg.ID,
+                  message_type:"status",
+                  status:"deleted"
+                })
+              }}
+            />
+          )}
           <Timestamp>{timestamp}</Timestamp>
-          {msg.sender_id === currentUser.ID && (
+          {msg.sender_id === currentUser.ID && !showTrash && (
             <StatusMark status={msg.status}>
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
               {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}

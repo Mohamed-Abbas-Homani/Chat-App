@@ -149,6 +149,7 @@ const ChatBox = ({ sendMessage }) => {
         />
       )}
       <MessagesContainer
+        sendMessage={sendMessage}
         messages={filteredMessages}
         currentUser={currentUser}
         users={users}
@@ -166,7 +167,7 @@ const ChatBox = ({ sendMessage }) => {
         <ProfilePictureModal
           show={showProfileModal}
           onClose={() => setShowProfileModal(false)}
-          src={`http://192.168.1.5:8080/${
+          src={`http://localhost:8080/${
             recipient.profile_picture || "uploads/default.jpg"
           }`}
         />

@@ -25,12 +25,12 @@ export const useStore = create(
           ],
         }),
       setRecipient: (recipient) => {
-        console.log(recipient.status)
+        console.log(recipient.status);
         set({ recipient });
       },
       updateRecipient: (data) => {
-        set({ recipient: {...get().recipient, ...data} });
-      }
+        set({ recipient: { ...get().recipient, ...data } });
+      },
     }),
     {
       name: "chat-app",
@@ -81,13 +81,22 @@ export const useStoreWithoutStorage = create((set, get) => ({
         }),
       ],
     }),
-
-  updateMsg: (msg) => set({messages: [...get().messages.map(m => {
-    if(m.ID == msg.ID){
-      m.content = msg.content
-    }
-    return m
-  })]})
+  deleteMsg: (id) => {
+    set({
+      messages: [...get().messages.filter((m) => m.ID != id)],
+    });
+  },
+  updateMsg: (msg) =>
+    set({
+      messages: [
+        ...get().messages.map((m) => {
+          if (m.ID == msg.ID) {
+            m.content = msg.content;
+          }
+          return m;
+        }),
+      ],
+    }),
 }));
 
 export const useUser = () => useStore((state) => state.user);
@@ -120,5 +129,9 @@ export const useMarkSeenMsg = () =>
 export const useWs = () => useStoreWithoutStorage((state) => state.ws);
 
 export const useSetWs = () => useStoreWithoutStorage((state) => state.setWs);
-export const useUpdateMsg = () => useStoreWithoutStorage((state) => state.updateMsg);
-export const useUpdateRecipient = () => useStore(state => state.updateRecipient)
+export const useUpdateMsg = () =>
+  useStoreWithoutStorage((state) => state.updateMsg);
+export const useDeleteMsg = () =>
+  useStoreWithoutStorage((state) => state.deleteMsg);
+export const useUpdateRecipient = () =>
+  useStore((state) => state.updateRecipient);

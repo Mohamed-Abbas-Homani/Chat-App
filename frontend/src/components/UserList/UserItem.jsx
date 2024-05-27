@@ -7,7 +7,7 @@ const UserItem = ({ user, selected, onClick, currentUser }) => {
   return (
     <UserItemContainer selected={selected} onClick={onClick}>
       <UserAvatar
-        src={`http://192.168.1.5:8080/${
+        src={`http://localhost:8080/${
           user?.profile_picture ? user.profile_picture : "uploads/default.jpg"
         }`}
         alt="Profile"
