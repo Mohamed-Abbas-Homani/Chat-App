@@ -145,6 +145,9 @@ const Message = ({ msg, isCurrentUser, user, currentUser }) => {
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
               {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
               {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}
+              {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
+              {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
+              {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}
             </StatusMark>
           )}
         </TimestampContainer>
