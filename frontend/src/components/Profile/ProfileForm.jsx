@@ -55,7 +55,7 @@ const ProfileForm = () => {
   return (
     <Form onSubmit={handleSubmit}>
       <Avatar
-        src={`http://localhost:8080/${
+        src={`http://192.168.1.5:8080/${
           user.profile_picture ?? "uploads/default.jpg"
         }`}
         alt={username}

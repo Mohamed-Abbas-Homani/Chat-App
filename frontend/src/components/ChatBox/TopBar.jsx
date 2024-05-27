@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useUser } from "../../services/store";
 import humanReadableTimeDifference from "../../helpers/timeHelper";
-import { FaSearch, FaArrowUp, FaArrowDown, FaTimes } from "react-icons/fa"; // Import arrow icons
+import { FaSearch, FaTimes } from "react-icons/fa"; // Import arrow icons
 import {
   TopBarContainer,
   UserAvatar,
@@ -39,11 +39,20 @@ const TopBar = ({
     setSearchInput("");
     setSearchResult({results:[], pos:0})
   };
-
+  const status = useMemo(() => {
+    if(currentUser.ID == recipient.ID){
+      return "Online"
+    } else {
+      if(recipient.status == "Offline") {
+        return `Offline ~ ${humanReadableTimeDifference(recipient.last_seen)}`
+      }
+    }
+    return recipient.status
+  }, [recipient.ID, recipient.status])
   return (
     <TopBarContainer>
       <UserAvatar
-        src={`http://localhost:8080/${
+        src={`http://192.168.1.5:8080/${
           recipient.profile_picture || "uploads/default.jpg"
         }`}
         alt="Profile"
@@ -59,9 +68,7 @@ const TopBar = ({
             recipient.status !== "Offline" || currentUser.ID === recipient.ID
           }
         >
-          {currentUser.ID === recipient.ID ? "Online" : recipient.status}
-          {recipient.status === "Offline" &&
-            ` ~ ${humanReadableTimeDifference(recipient.last_seen)}`}
+          {status}
         </UserStatus>
       </UserInfo>
       {!searchVisible && <SearchIcon onClick={toggleSearch} />}

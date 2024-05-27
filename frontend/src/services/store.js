@@ -25,8 +25,12 @@ export const useStore = create(
           ],
         }),
       setRecipient: (recipient) => {
+        console.log(recipient.status)
         set({ recipient });
       },
+      updateRecipient: (data) => {
+        set({ recipient: {...get().recipient, ...data} });
+      }
     }),
     {
       name: "chat-app",
@@ -117,3 +121,4 @@ export const useWs = () => useStoreWithoutStorage((state) => state.ws);
 
 export const useSetWs = () => useStoreWithoutStorage((state) => state.setWs);
 export const useUpdateMsg = () => useStoreWithoutStorage((state) => state.updateMsg);
+export const useUpdateRecipient = () => useStore(state => state.updateRecipient)

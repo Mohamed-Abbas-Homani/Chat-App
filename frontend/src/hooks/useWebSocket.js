@@ -5,7 +5,7 @@ const useWebSocket = (token) => {
 
   useEffect(() => {
     if (token) {
-      const socket = new WebSocket(`ws://localhost:8000/ws?token=${token}`);
+      const socket = new WebSocket(`ws://192.168.1.5:8000/ws?token=${token}`);
       socket.onopen = () => console.log("WebSocket connected");
       socket.onclose = () => console.log("WebSocket disconnected");
       socket.onerror = (error) => console.error("WebSocket error:", error);
@@ -18,6 +18,7 @@ const useWebSocket = (token) => {
 
   const sendMessage = (msg) => {
     if (ws) {
+      console.log(msg.content)
       ws.send(JSON.stringify(msg));
     }
   };

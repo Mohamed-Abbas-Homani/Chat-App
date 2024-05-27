@@ -125,8 +125,8 @@ const ChatBox = ({ sendMessage }) => {
     }
   };
 
-  useEffect(updateTypingStatus, [input, recipient]);
-  useEffect(updateEmojiPickerStatus, [showEmojiPicker, recipient]);
+  useEffect(updateTypingStatus, [input, recipient.ID]);
+  useEffect(updateEmojiPickerStatus, [showEmojiPicker, recipient.ID]);
   useEffect(updateRecipientStatus, [recipient.ID, messages.length]);
 
   const filteredMessages = useMemo(getFilteredMessages, [
@@ -166,7 +166,7 @@ const ChatBox = ({ sendMessage }) => {
         <ProfilePictureModal
           show={showProfileModal}
           onClose={() => setShowProfileModal(false)}
-          src={`http://localhost:8080/${
+          src={`http://192.168.1.5:8080/${
             recipient.profile_picture || "uploads/default.jpg"
           }`}
         />

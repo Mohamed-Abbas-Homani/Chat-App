@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { useUnseenMessages } from "../../services/store";
-import Message from "../Message";
+import Message from "./Message";
 import { MessagesWrapper } from "./Style";
 
 const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
@@ -18,9 +18,12 @@ const MessagesContainer = ({ messages, currentUser, users, recipientId }) => {
     }
   }, [messages]);
 
+  const sortedMessages = [...messages].sort(
+    (a, b) => new Date(a.CreatedAt) - new Date(b.CreatedAt)
+  );
   return (
     <MessagesWrapper>
-      {messages.map((msg) => {
+      {sortedMessages.map((msg) => {
         const isCurrentUser = msg.sender_id === currentUser.ID;
         const user = users.find((u) => u.ID === msg.sender_id);
         return (

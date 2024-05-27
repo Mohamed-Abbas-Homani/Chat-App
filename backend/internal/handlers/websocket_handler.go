@@ -149,6 +149,7 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 			}
 	
 			log.Printf("Message from user %d saved to database", client.userID)
+			h.sendMessageToRecipient(msg, msg.SenderID)
 			if msg.RecipientID != 0 {
 				h.sendMessageToRecipient(msg, msg.RecipientID)
 			} else if msg.GroupID != 0 {
@@ -156,7 +157,7 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 			} else {
 				h.broadcast <- msg
 			}
-			h.sendMessageToRecipient(msg, msg.SenderID)
+		
 		
 		case models.MessageTypeSystem:
 			log.Println("Message of type System")

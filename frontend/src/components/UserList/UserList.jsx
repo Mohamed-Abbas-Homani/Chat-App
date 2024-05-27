@@ -1,16 +1,23 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   useRecipient,
   useSetRecipient,
   useUser,
   useUsers,
   useUnseenMessages,
+  useToken,
 } from "../../services/store";
 import { UserListContainer } from "./Style";
 import SearchAndFilter from "./SearchAndFilter";
 import UserItem from "./UserItem";
+import useFetchUsers from "../../hooks/useFetchUsers";
 
 const UserList = () => {
+  const token = useToken();
+  const {fetchUsers} = useFetchUsers()
+  useEffect(() => {
+    fetchUsers();
+  }, [token]);
   const users = useUsers();
   const unseenMessages = useUnseenMessages();
   const currentUser = useUser();

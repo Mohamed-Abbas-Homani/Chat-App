@@ -11,8 +11,10 @@ import {
   useMarkSeenMsg,
   useMessages,
   useRecipient,
+  useSetRecipient,
   useSetUsers,
   useToken,
+  useUpdateRecipient,
   useUser,
   useUsers,
 } from "../services/store";
@@ -35,10 +37,7 @@ const Chat = () => {
   const setUsers = useSetUsers();
   const { fetchUsers } = useFetchUsers();
   const { ws, sendMessage, closeWebSocket } = useWebSocket(token);
-
-  useEffect(() => {
-    fetchUsers();
-  }, [token]);
+  const updateRecipient = useUpdateRecipient()
 
   useEffect(() => {
     if (ws) {
@@ -79,12 +78,18 @@ const Chat = () => {
   };
 
   const handleSystemMessage = (message) => {
+    if (recipient.ID == message.sender_id) {
+      console.log("asdf")
+      updateRecipient({
+        status: message.content,
+        last_seen: message.status,
+      });
+    }
     setUsers([
       ...users.map((u) => {
         if (u.ID == message.sender_id) {
           u.status = message.content;
-          u.last_seen = message.status
-          console.log(u.status);
+          u.last_seen = message.status;
         }
         return u;
       }),
@@ -101,7 +106,7 @@ const Chat = () => {
 
   return (
     <ChatPageContainer>
-      {users.length && <UserList />}
+      <UserList />
       {recipient && recipient.ID && <ChatBox sendMessage={sendMessage} />}
     </ChatPageContainer>
   );
