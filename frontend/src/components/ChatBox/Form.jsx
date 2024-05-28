@@ -14,7 +14,7 @@ import {
 import EmojiPicker from "./EmojiPicker";
 import useFileUpload from "../../hooks/useFileUpload";
 import { useRecipient, useUser } from "../../services/store";
-import CropperModal from "./CropperModal"; // Import CropperModal
+import CropperModal from "./PhotoPreprocessing/CropperModal"; // Import CropperModal
 
 // List of emojis to cycle through
 const emojis = ["😀", "😁", "😂", "🤣", "😊", "😇", "🥰", "😍", "🤩", "😘"];
@@ -90,7 +90,10 @@ const Form = ({
   };
 
   const handleCrop = (croppedImageDataUrl) => {
-    const croppedFile = dataURLtoFile(croppedImageDataUrl, "cropped-image.jpg");
+    const croppedFile = dataURLtoFile(
+      croppedImageDataUrl,
+      `cropped-image-at-${new Date().toString()}.jpg`
+    );
     uploadAndSendFile(croppedFile);
   };
 
@@ -161,11 +164,16 @@ const Form = ({
           onKeyDown={handleKeyDown}
           rows={1}
         />
-        <EmojiButtonWrapper onClick={() => setShowEmojiPicker(!showEmojiPicker)}>
+        <EmojiButtonWrapper
+          onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+        >
           {currentEmoji}
         </EmojiButtonWrapper>
         {showEmojiPicker && <EmojiPicker onSelect={handleSelectEmoji} />}
-        <SendButton onClick={handleSubmit} disabled={!input.trim() || uploading}>
+        <SendButton
+          onClick={handleSubmit}
+          disabled={!input.trim() || uploading}
+        >
           <IoMdSend size={"1.2em"} />
         </SendButton>
       </FormWrapper>
