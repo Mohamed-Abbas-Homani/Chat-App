@@ -182,7 +182,7 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
           {msg.sender_id === currentUser.ID && !showTrash && (
             <StatusMark status={msg.status}>
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
-              {msg.status === "delivered" && <IoCheckmarkDone size={"1.2em"} />}
+              {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
               {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}
             </StatusMark>
           )}
