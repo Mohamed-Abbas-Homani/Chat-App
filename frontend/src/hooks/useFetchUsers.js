@@ -6,7 +6,7 @@ const useFetchUsers = () => {
   const token = useToken()
   const fetchUsers = async () => {
     try {
-      const response = await axios.get("http://localhost:8080/user/", {
+      const response = await axios.get("http://192.168.1.5:8080/user/", {
         headers: {
           Authorization: `Bearer ${token}`
         }

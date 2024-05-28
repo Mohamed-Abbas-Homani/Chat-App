@@ -14,10 +14,10 @@ import useFetchUsers from "../../hooks/useFetchUsers";
 
 const UserList = () => {
   const token = useToken();
-  const {fetchUsers} = useFetchUsers()
-  useEffect(() => {
-    fetchUsers();
-  }, [token]);
+  const { fetchUsers } = useFetchUsers();
+  // useEffect(() => {
+  //   (async () => await fetchUsers())();
+  // }, [token]);
   const users = useUsers();
   const unseenMessages = useUnseenMessages();
   const currentUser = useUser();
@@ -35,20 +35,29 @@ const UserList = () => {
       const unseenB = unseenMessages[b.ID] || 0;
       if (unseenA > unseenB) return -1;
       if (unseenA < unseenB) return 1;
-      const statusPriority = { "is picking emoji...": 0, "is typing...": 1, "Online": 2, "Offline": 3 };
+      const statusPriority = {
+        "is picking emoji...": 0,
+        "is typing...": 1,
+        Online: 2,
+        Offline: 3,
+      };
       const statusA = statusPriority[a.status] ?? 4;
       const statusB = statusPriority[b.status] ?? 4;
       if (statusA < statusB) return -1;
       if (statusA > statusB) return 1;
       return a.username.localeCompare(b.username);
     });
-  }, [users, unseenMessages]);
+  }, [users.length, unseenMessages]);
 
   const filteredUsers = useMemo(() => {
     return sortedUsers.filter((user) => {
-      const matchesSearch = user.username.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesOnlineStatus = filterOptions.showOffline || user.status === "Online";
-      const matchesUnseenStatus = !filterOptions.showUnseen || unseenMessages[user.ID] > 0;
+      const matchesSearch = user.username
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesOnlineStatus =
+        filterOptions.showOffline || user.status === "Online";
+      const matchesUnseenStatus =
+        !filterOptions.showUnseen || unseenMessages[user.ID] > 0;
       return matchesSearch && matchesOnlineStatus && matchesUnseenStatus;
     });
   }, [sortedUsers, searchTerm, filterOptions, unseenMessages]);

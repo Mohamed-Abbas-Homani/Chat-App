@@ -6,7 +6,7 @@ const useDeleteMessage = () => {
   const token = useToken()
   const deleteMessage = async (id) => {
     try {
-      const response = await axios.delete(`http://localhost:8080/message/${id}`, {
+      const response = await axios.delete(`http://192.168.1.5:8080/message/${id}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

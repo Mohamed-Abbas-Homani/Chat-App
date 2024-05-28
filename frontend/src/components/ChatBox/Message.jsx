@@ -132,7 +132,7 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
   const [showTrash, setShowTrash] = useState(false);
 
   const renderMedia = (filePath, mediaType) => {
-    const fileUrl = `http://localhost:8080/${filePath}`;
+    const fileUrl = `http://192.168.1.5:8080/${filePath}`;
     switch (mediaType) {
       case "image/*":
         return <ImageComponent src={fileUrl} />;
@@ -153,7 +153,7 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
       onMouseLeave={() => setShowTrash(false)}
     >
       <Avatar
-        src={`http://localhost:8080/${avatarUrl ?? "uploads/default.jpg"}`}
+        src={`http://192.168.1.5:8080/${avatarUrl ?? "uploads/default.jpg"}`}
         alt={username}
       />
       <MessageContent $isCurrentUser={isCurrentUser}>

@@ -108,11 +108,13 @@ const Chat = () => {
       markSeenMsg(message, currentUser.ID);
     }
   };
-
+  useEffect(() => {
+  fetchUsers();
+  }, [token]);
   return (
     <ChatPageContainer>
-      <UserList />
-      {recipient && recipient.ID && <ChatBox sendMessage={sendMessage} />}
+      {!!users.length && <UserList users={users}/>}
+      {!!recipient && !!recipient.ID && <ChatBox sendMessage={sendMessage} />}
     </ChatPageContainer>
   );
 };

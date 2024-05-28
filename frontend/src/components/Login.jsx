@@ -54,7 +54,7 @@ const Login = ({ isLogin, setIsLogin }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:8080/auth/login", {
+      const response = await axios.post("http://192.168.1.5:8080/auth/login", {
         email,
         password,
       });
