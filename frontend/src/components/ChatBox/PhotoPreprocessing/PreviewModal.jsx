@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import PreviewControls from "./PreviewControls";
 import OverlayText from "./OverlayText";
@@ -24,22 +24,33 @@ const ModalContent = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  max-height: 90%;
-  overflow-y: auto;
+  max-height: 80%;
+  max-width: 90%;
+  overflow: hidden;
 `;
 
 const PreviewImageWrapper = styled.div`
   position: relative;
-  width: 400px;
-  height: 400px;
+  width: 300px;
+  height: 300px;
+  margin-bottom: 20px;
 `;
 
 const PreviewImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: ${({ brightness, blur, sepia, grayscale }) =>
-    `brightness(${brightness}%) blur(${blur}px) sepia(${sepia}%) grayscale(${grayscale}%)`};
+  filter: ${({ brightness, blur, sepia, grayscale, red, green, blue }) =>
+    `brightness(${brightness}%) blur(${blur}px) sepia(${sepia}%) grayscale(${grayscale}%) contrast(${red}%) saturate(${green}%) hue-rotate(${blue}deg)`};
+`;
+
+const Canvas = styled.canvas`
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAB7CAAAewgFu0HU+AAABN0lEQVQ4y2NgoAXY+cSIk8GQGZFq1tK9sU6tW7YMZ19aG9vb+EZIxcxEdeXdu5cmSzYmNjGwb/+/cufMjdwqK1YsaUe8+rVq2ewrVnL/8lQJwfAfX3d2dlYOTnZmZmYGZn/BnTt3XjRmj4f9y+b2X0nT/31t7fXwKi6bVj8eg9QMIzNm2Z19fX74My5c+5Pazd6s6Ym1f+Ztu/fv3Z2Pj/AOX54+fpFsths37hLQX+Xb169QUBePHixZfZLNB7e3t3XV3QdDAwPnzezu7t7+fPnw9TUn2YSJRM4RPT+/fevR1nb/Lx4A2zw/V1t4jRHAsMTFA9pJvDvzB6A/fX1b35/M4RNoA0T30DIAZnLxwSmDDYACfUHp80T6D+cPbdZ2DzwBxNYq4cJ5MwAAAABJRU5ErkJggg=='), auto;
 `;
 
 const ButtonGroup = styled.div`
@@ -74,10 +85,92 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
   const [blur, setBlur] = useState(0);
   const [sepia, setSepia] = useState(0);
   const [grayscale, setGrayscale] = useState(0);
+  const [red, setRed] = useState(100);
+  const [green, setGreen] = useState(100);
+  const [blue, setBlue] = useState(0);
   const [text, setText] = useState("");
   const [textSize, setTextSize] = useState(30);
   const [textColor, setTextColor] = useState("white");
   const [textPosition, setTextPosition] = useState({ x: 0, y: 0 });
+
+  const canvasRef = useRef(null);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [drawingContext, setDrawingContext] = useState(null);
+  const [drawHistory, setDrawHistory] = useState([]);
+  const [redoStack, setRedoStack] = useState([]);
+
+  useEffect(() => {
+    if (canvasRef.current) {
+      const context = canvasRef.current.getContext("2d");
+      setDrawingContext(context);
+    }
+  }, []);
+
+  const startDrawing = ({ nativeEvent }) => {
+    const { offsetX, offsetY } = nativeEvent;
+    drawingContext.beginPath();
+    drawingContext.moveTo(offsetX, offsetY);
+    setIsDrawing(true);
+  };
+
+  const draw = ({ nativeEvent }) => {
+    if (!isDrawing) return;
+    const { offsetX, offsetY } = nativeEvent;
+    drawingContext.strokeStyle = textColor;
+    drawingContext.lineWidth = 2;
+    drawingContext.lineCap = "round";
+    drawingContext.lineTo(offsetX, offsetY);
+    drawingContext.stroke();
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      drawingContext.closePath();
+      const newDrawHistory = [...drawHistory];
+      newDrawHistory.push(canvasRef.current.toDataURL());
+      setDrawHistory(newDrawHistory);
+      setRedoStack([]);
+    }
+    setIsDrawing(false);
+  };
+
+  const handleUndo = () => {
+    if (drawHistory.length > 0) {
+      const newRedoStack = [...redoStack];
+      newRedoStack.push(drawHistory.pop());
+      setDrawHistory([...drawHistory]);
+      setRedoStack(newRedoStack);
+      redrawCanvas();
+    }
+  };
+
+  const handleRedo = () => {
+    if (redoStack.length > 0) {
+      const newDrawHistory = [...drawHistory];
+      newDrawHistory.push(redoStack.pop());
+      setDrawHistory(newDrawHistory);
+      setRedoStack([...redoStack]);
+      redrawCanvas();
+    }
+  };
+
+  const handleReset = () => {
+    setDrawHistory([]);
+    setRedoStack([]);
+    redrawCanvas();
+  };
+
+  const redrawCanvas = () => {
+    const canvas = canvasRef.current;
+    const context = drawingContext;
+    const image = new Image();
+    image.src = drawHistory.length > 0 ? drawHistory[drawHistory.length - 1] : croppedImage;
+
+    image.onload = () => {
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.drawImage(image, 0, 0, canvas.width, canvas.height);
+    };
+  };
 
   const handleSave = () => {
     const canvas = document.createElement("canvas");
@@ -88,18 +181,21 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
     image.onload = () => {
       canvas.width = image.width;
       canvas.height = image.height;
-      context.filter = `brightness(${brightness}%) blur(${blur}px) sepia(${sepia}%) grayscale(${grayscale}%)`;
+      context.filter = `brightness(${brightness}%) blur(${blur}px) sepia(${sepia}%) grayscale(${grayscale}%) contrast(${red}%) saturate(${green}%) hue-rotate(${blue}deg)`;
       context.drawImage(image, 0, 0);
-      context.font = `${textSize * (canvas.width / 400)}px Arial`;
+      context.font = `${textSize * (canvas.width / 300)}px Arial`;
       context.fillStyle = textColor;
       context.textAlign = "center";
 
       const xPos =
-        canvas.width / 2 + parseInt(textPosition.x) * (canvas.width / 400);
+        canvas.width / 2 + parseInt(textPosition.x) * (canvas.width / 300);
       const yPos =
-        canvas.height / 2 + parseInt(textPosition.y) * (canvas.height / 400);
+        canvas.height / 2 + parseInt(textPosition.y) * (canvas.height / 300);
 
       context.fillText(text, xPos, yPos);
+
+      // Copy the drawing to the final canvas
+      context.drawImage(canvasRef.current, 0, 0, canvas.width, canvas.height);
 
       const dataUrl = canvas.toDataURL("image/jpeg");
       onCrop(dataUrl);
@@ -117,6 +213,16 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
             blur={blur}
             sepia={sepia}
             grayscale={grayscale}
+            red={red}
+            green={green}
+            blue={blue}
+          />
+          <Canvas
+            ref={canvasRef}
+            onMouseDown={startDrawing}
+            onMouseMove={draw}
+            onMouseUp={stopDrawing}
+            onMouseLeave={stopDrawing}
           />
           <OverlayText
             text={text}
@@ -134,6 +240,12 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
           setSepia={setSepia}
           grayscale={grayscale}
           setGrayscale={setGrayscale}
+          red={red}
+          setRed={setRed}
+          green={green}
+          setGreen={setGreen}
+          blue={blue}
+          setBlue={setBlue}
           text={text}
           setText={setText}
           textSize={textSize}
@@ -146,6 +258,13 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
         <ButtonGroup>
           <Button onClick={handleSave}>Save</Button>
           <Button onClick={onClose}>Cancel</Button>
+          <Button onClick={handleUndo} disabled={drawHistory.length === 0}>
+            Undo
+          </Button>
+          <Button onClick={handleRedo} disabled={redoStack.length === 0}>
+            Redo
+          </Button>
+          <Button onClick={handleReset}>Reset</Button>
         </ButtonGroup>
       </ModalContent>
     </ModalWrapper>

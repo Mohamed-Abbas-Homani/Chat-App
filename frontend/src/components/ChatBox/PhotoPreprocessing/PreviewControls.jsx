@@ -1,28 +1,41 @@
-import React from 'react';
-import styled from 'styled-components';
+import React from "react";
+import styled from "styled-components";
+import { FaFont, FaTextHeight, FaPalette, FaAdjust, FaTint } from "react-icons/fa";
 
 const ControlWrapper = styled.div`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
   width: 100%;
+`;
+
+const ControlRow = styled.div`
+  display: flex;
   align-items: center;
+  gap: 10px;
+`;
+
+const Label = styled.label`
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
 `;
 
 const RangeInput = styled.input`
-  width: 100%;
+  flex-grow: 1;
+  margin-left: 10px;
 `;
 
 const TextInput = styled.input`
-  width: 100%;
+  flex-grow: 1;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
 `;
 
 const ColorInput = styled.input`
-  width: 100%;
+  flex-grow: 1;
   padding: 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
@@ -37,6 +50,12 @@ const PreviewControls = ({
   setSepia,
   grayscale,
   setGrayscale,
+  red,
+  setRed,
+  green,
+  setGreen,
+  blue,
+  setBlue,
   text,
   setText,
   textSize,
@@ -47,16 +66,20 @@ const PreviewControls = ({
   setTextPosition,
 }) => (
   <ControlWrapper>
-      <div>
-      <label>Text: </label>
+    <ControlRow>
+      <Label>
+        <FaFont /> Text:
+      </Label>
       <TextInput
         type="text"
         value={text}
         onChange={(e) => setText(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Text Size: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTextHeight /> Text Size:
+      </Label>
       <RangeInput
         type="range"
         min="10"
@@ -64,37 +87,45 @@ const PreviewControls = ({
         value={textSize}
         onChange={(e) => setTextSize(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Text Color: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaPalette /> Text Color:
+      </Label>
       <ColorInput
         type="color"
         value={textColor}
         onChange={(e) => setTextColor(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Text Position X: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaAdjust /> Text Position X:
+      </Label>
       <RangeInput
         type="range"
-        min="-200"
-        max="200"
+        min="-150"
+        max="150"
         value={textPosition.x}
         onChange={(e) => setTextPosition({ ...textPosition, x: e.target.value })}
       />
-    </div>
-    <div>
-      <label>Text Position Y: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaAdjust /> Text Position Y:
+      </Label>
       <RangeInput
         type="range"
-        min="-200"
-        max="200"
+        min="-150"
+        max="150"
         value={textPosition.y}
         onChange={(e) => setTextPosition({ ...textPosition, y: e.target.value })}
       />
-    </div>
-    <div>
-      <label>Brightness: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaAdjust /> Brightness:
+      </Label>
       <RangeInput
         type="range"
         min="0"
@@ -102,9 +133,11 @@ const PreviewControls = ({
         value={brightness}
         onChange={(e) => setBrightness(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Blur: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Blur:
+      </Label>
       <RangeInput
         type="range"
         min="0"
@@ -112,9 +145,11 @@ const PreviewControls = ({
         value={blur}
         onChange={(e) => setBlur(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Sepia: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Sepia:
+      </Label>
       <RangeInput
         type="range"
         min="0"
@@ -122,9 +157,11 @@ const PreviewControls = ({
         value={sepia}
         onChange={(e) => setSepia(e.target.value)}
       />
-    </div>
-    <div>
-      <label>Grayscale: </label>
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Grayscale:
+      </Label>
       <RangeInput
         type="range"
         min="0"
@@ -132,8 +169,43 @@ const PreviewControls = ({
         value={grayscale}
         onChange={(e) => setGrayscale(e.target.value)}
       />
-    </div>
-  
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Red:
+      </Label>
+      <RangeInput
+        type="range"
+        min="0"
+        max="200"
+        value={red}
+        onChange={(e) => setRed(e.target.value)}
+      />
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Green:
+      </Label>
+      <RangeInput
+        type="range"
+        min="0"
+        max="200"
+        value={green}
+        onChange={(e) => setGreen(e.target.value)}
+      />
+    </ControlRow>
+    <ControlRow>
+      <Label>
+        <FaTint /> Blue:
+      </Label>
+      <RangeInput
+        type="range"
+        min="-180"
+        max="180"
+        value={blue}
+        onChange={(e) => setBlue(e.target.value)}
+      />
+    </ControlRow>
   </ControlWrapper>
 );
 
