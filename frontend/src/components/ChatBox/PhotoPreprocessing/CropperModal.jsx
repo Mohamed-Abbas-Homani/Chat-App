@@ -1,10 +1,10 @@
-import React, { useRef, useEffect, useState } from 'react';
-import styled from 'styled-components';
-import Cropper from 'cropperjs';
-import 'cropperjs/dist/cropper.css';
-import CropperContainer from './CropperContainer';
-import Controls from './Controls';
-import PreviewModal from './PreviewModal';
+import React, { useRef, useEffect, useState } from "react";
+import styled from "styled-components";
+import Cropper from "cropperjs";
+import "cropperjs/dist/cropper.css";
+import CropperContainer from "./CropperContainer";
+import Controls from "./Controls";
+import PreviewModal from "./PreviewModal";
 
 const ModalWrapper = styled.div`
   position: fixed;
@@ -65,9 +65,7 @@ const CropperModal = ({ src, onClose, onCrop }) => {
 
   useEffect(() => {
     const image = cropperRef.current;
-    const cropperInstance = new Cropper(image, {
-    
-    });
+    const cropperInstance = new Cropper(image, {});
     setCropper(cropperInstance);
 
     return () => {
@@ -78,7 +76,7 @@ const CropperModal = ({ src, onClose, onCrop }) => {
   const handleCrop = () => {
     if (cropper) {
       const canvas = cropper.getCroppedCanvas();
-      const croppedDataUrl = canvas.toDataURL('image/jpeg');
+      const croppedDataUrl = canvas.toDataURL("image/jpeg");
       setCroppedImage(croppedDataUrl);
     }
   };
