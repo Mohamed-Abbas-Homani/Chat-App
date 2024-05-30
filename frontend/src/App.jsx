@@ -24,6 +24,10 @@ const App = () => {
             path="/chat"
             element={token ? <ChatPage /> : <Navigate to="/auth" />}
           />
+          <Route
+            path="/*"
+            element={token ? <ChatPage /> : <Navigate to="/auth" />}
+          />
         </Routes>
       </Router>
     </div>

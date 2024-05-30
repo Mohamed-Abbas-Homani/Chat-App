@@ -7,20 +7,20 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-  Button,
   CloseButton,
   UserAvatarModal,
   ButtonModal,
 } from "./Style";
 import {
   useRecipient,
+  useSetLogin,
   useUpdateRecipient,
   useUpdateUser,
   useUser,
 } from "../../services/store";
-import useFetchUsers from "../../hooks/useFetchUsers";
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
+  const setLogin = useSetLogin();
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio || "");
   const [profilePicture, setProfilePicture] = useState(null);
@@ -116,6 +116,17 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
             />
             <ModalFooter>
               {isCurrentUser && <ButtonModal type="submit">Save</ButtonModal>}
+              {isCurrentUser && (
+                <ButtonModal
+                  type="button"
+                  onClick={() => {
+                    setLogin({ user: null, token: null });
+                    // if (ws) ws.close();
+                  }}
+                >
+                  Logout
+                </ButtonModal>
+              )}
             </ModalFooter>
           </form>
         </ModalBody>

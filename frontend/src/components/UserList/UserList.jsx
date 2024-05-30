@@ -1,70 +1,33 @@
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useEffect } from "react";
 import {
-  useRecipient,
   useSetRecipient,
   useUser,
-  useUsers,
-  useUnseenMessages,
+  useRecipient,
   useToken,
 } from "../../services/store";
 import { UserListContainer, UserScrollContainer } from "./Style";
 import SearchAndFilter from "./SearchAndFilter";
 import UserItem from "./UserItem";
 import useFetchUsers from "../../hooks/useFetchUsers";
+import useFilteredUsers from "../../hooks/useFilteredUsers";
 
 const UserList = () => {
   const token = useToken();
   const { fetchUsers } = useFetchUsers();
+  const setRecipient = useSetRecipient();
+  const currentUser = useUser();
+  const recipient = useRecipient();
+  const {
+    filteredUsers,
+    searchTerm,
+    setSearchTerm,
+    filterOptions,
+    handleFilterChange,
+  } = useFilteredUsers();
+
   useEffect(() => {
     (async () => await fetchUsers())();
   }, [token]);
-  const users = useUsers();
-  const unseenMessages = useUnseenMessages();
-  const currentUser = useUser();
-  const setRecipient = useSetRecipient();
-  const recipient = useRecipient();
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filterOptions, setFilterOptions] = useState({
-    showOffline: true,
-    showUnseen: false,
-  });
-
-  const sortedUsers = useMemo(() => {
-    return users.sort((a, b) => {
-      const unseenA = unseenMessages[a.ID] || 0;
-      const unseenB = unseenMessages[b.ID] || 0;
-      if (unseenA > unseenB) return -1;
-      if (unseenA < unseenB) return 1;
-      const statusPriority = {
-        "is picking emoji...": 0,
-        "is typing...": 1,
-        Online: 2,
-        Offline: 3,
-      };
-      const statusA = statusPriority[a.status] ?? 4;
-      const statusB = statusPriority[b.status] ?? 4;
-      if (statusA < statusB) return -1;
-      if (statusA > statusB) return 1;
-      return a.username.localeCompare(b.username);
-    });
-  }, [users, unseenMessages]);
-
-  const filteredUsers = useMemo(() => {
-    return sortedUsers.filter((user) => {
-      const matchesSearch = user.username
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-      const matchesOnlineStatus =
-        filterOptions.showOffline || user.status === "Online";
-      const matchesUnseenStatus =
-        !filterOptions.showUnseen || unseenMessages[user.ID] > 0;
-      return matchesSearch && matchesOnlineStatus && matchesUnseenStatus;
-    });
-  }, [sortedUsers, searchTerm, filterOptions, unseenMessages]);
-
-  const handleFilterChange = (option, value) => {
-    setFilterOptions((prev) => ({ ...prev, [option]: value }));
-  };
 
   return (
     <UserListContainer>
@@ -76,9 +39,9 @@ const UserList = () => {
         onFilterChange={handleFilterChange}
       />
       <UserScrollContainer>
-        {filteredUsers.map((user, index) => (
+        {filteredUsers.map((user) => (
           <UserItem
-            key={index}
+            key={user.ID}
             user={user}
             selected={recipient?.ID === user.ID}
             onClick={() => setRecipient(user)}

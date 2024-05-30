@@ -50,7 +50,7 @@ const Canvas = styled.canvas`
   left: 0;
   width: 100%;
   height: 100%;
-  cursor: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAACXBIWXMAAB7CAAAewgFu0HU+AAABN0lEQVQ4y2NgoAXY+cSIk8GQGZFq1tK9sU6tW7YMZ19aG9vb+EZIxcxEdeXdu5cmSzYmNjGwb/+/cufMjdwqK1YsaUe8+rVq2ewrVnL/8lQJwfAfX3d2dlYOTnZmZmYGZn/BnTt3XjRmj4f9y+b2X0nT/31t7fXwKi6bVj8eg9QMIzNm2Z19fX74My5c+5Pazd6s6Ym1f+Ztu/fv3Z2Pj/AOX54+fpFsths37hLQX+Xb169QUBePHixZfZLNB7e3t3XV3QdDAwPnzezu7t7+fPnw9TUn2YSJRM4RPT+/fevR1nb/Lx4A2zw/V1t4jRHAsMTFA9pJvDvzB6A/fX1b35/M4RNoA0T30DIAZnLxwSmDDYACfUHp80T6D+cPbdZ2DzwBxNYq4cJ5MwAAAABJRU5ErkJggg=='), auto;
+  cursor: pointer;
 `;
 
 const ButtonGroup = styled.div`
@@ -164,7 +164,10 @@ const PreviewModal = ({ croppedImage, onClose, onCrop }) => {
     const canvas = canvasRef.current;
     const context = drawingContext;
     const image = new Image();
-    image.src = drawHistory.length > 0 ? drawHistory[drawHistory.length - 1] : croppedImage;
+    image.src =
+      drawHistory.length > 0
+        ? drawHistory[drawHistory.length - 1]
+        : croppedImage;
 
     image.onload = () => {
       context.clearRect(0, 0, canvas.width, canvas.height);
