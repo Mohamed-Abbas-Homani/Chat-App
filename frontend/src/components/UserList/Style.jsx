@@ -60,6 +60,11 @@ export const UserListContainer = styled.div`
   border-right: 1px solid #ddd;
 `;
 
+export const UserScrollContainer = styled.div`
+  max-height: 75vh; /* Adjust height as needed */
+  overflow-y: auto;
+`;
+
 export const SearchContainer = styled.div`
   display: flex;
   justify-content: space-around;
@@ -75,8 +80,7 @@ export const SearchBar = styled.input`
   border: none;
   margin-bottom: 10px;
   background: #f0f2f5;
-box-shadow: inset 3px 3px 3px #ccced0,
-            inset -3px -3px 3px #ffffff;
+  box-shadow: inset 3px 3px 3px #ccced0, inset -3px -3px 3px #ffffff;
 `;
 
 export const FilterContainer = styled.div`

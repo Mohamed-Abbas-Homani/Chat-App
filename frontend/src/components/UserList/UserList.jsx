@@ -7,7 +7,7 @@ import {
   useUnseenMessages,
   useToken,
 } from "../../services/store";
-import { UserListContainer } from "./Style";
+import { UserListContainer, UserScrollContainer } from "./Style";
 import SearchAndFilter from "./SearchAndFilter";
 import UserItem from "./UserItem";
 import useFetchUsers from "../../hooks/useFetchUsers";
@@ -15,9 +15,9 @@ import useFetchUsers from "../../hooks/useFetchUsers";
 const UserList = () => {
   const token = useToken();
   const { fetchUsers } = useFetchUsers();
-  // useEffect(() => {
-  //   (async () => await fetchUsers())();
-  // }, [token]);
+  useEffect(() => {
+    (async () => await fetchUsers())();
+  }, [token]);
   const users = useUsers();
   const unseenMessages = useUnseenMessages();
   const currentUser = useUser();
@@ -47,7 +47,7 @@ const UserList = () => {
       if (statusA > statusB) return 1;
       return a.username.localeCompare(b.username);
     });
-  }, [users.length, unseenMessages]);
+  }, [users, unseenMessages]);
 
   const filteredUsers = useMemo(() => {
     return sortedUsers.filter((user) => {
@@ -75,15 +75,17 @@ const UserList = () => {
         filterOptions={filterOptions}
         onFilterChange={handleFilterChange}
       />
-      {filteredUsers.map((user, index) => (
-        <UserItem
-          key={index}
-          user={user}
-          selected={recipient?.ID === user.ID}
-          onClick={() => setRecipient(user)}
-          currentUser={currentUser}
-        />
-      ))}
+      <UserScrollContainer>
+        {filteredUsers.map((user, index) => (
+          <UserItem
+            key={index}
+            user={user}
+            selected={recipient?.ID === user.ID}
+            onClick={() => setRecipient(user)}
+            currentUser={currentUser}
+          />
+        ))}
+      </UserScrollContainer>
     </UserListContainer>
   );
 };

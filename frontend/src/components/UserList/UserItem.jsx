@@ -1,14 +1,18 @@
-import { useUnseenMessages } from "../../services/store";
+import { useRecipient, useUnseenMessages } from "../../services/store";
 import { UserAvatar, UserInfo, UnseenMessageCounter } from "./Style"; // Import UnseenMessageCounter
 import { UserItemContainer, UserStatus, Username } from "./Style";
 
 const UserItem = ({ user, selected, onClick, currentUser }) => {
   const unseenMessages = useUnseenMessages();
+  const avatarUrl =
+    currentUser.ID == user.ID
+      ? currentUser.profile_picture
+      : user?.profile_picture;
   return (
     <UserItemContainer selected={selected} onClick={onClick}>
       <UserAvatar
         src={`http://localhost:8080/${
-          user?.profile_picture ? user.profile_picture : "uploads/default.jpg"
+          avatarUrl ?? "uploads/default.jpg"
         }`}
         alt="Profile"
       />

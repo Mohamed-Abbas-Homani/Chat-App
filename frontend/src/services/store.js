@@ -18,12 +18,25 @@ export const useStore = create(
             ...get().users.map((u) => {
               if (u.ID == message.sender_id) {
                 u.status = message.content;
-                console.log(u.status);
+                u.last_seen = message.status;
               }
               return u;
             }),
           ],
         }),
+        updateUser: (data) =>{
+          set({
+            users: [
+              ...get().users.map((u) => {
+                if (u.ID == data.ID) {
+                  return {...u, ...data}
+                }
+                return u;
+              }),
+            ],
+          })
+        console.log(data)
+        },
       setRecipient: (recipient) => {
         console.log(recipient.status);
         set({ recipient });
@@ -108,6 +121,8 @@ export const useUsers = () => useStore((state) => state.users);
 export const useSetUsers = () => useStore((state) => state.setUsers);
 export const useUpdateUserStatus = () =>
   useStore((state) => state.updateUserStatus);
+export const useUpdateUser = () =>
+  useStore((state) => state.updateUser);
 export const useMessages = () =>
   useStoreWithoutStorage((state) => state.messages);
 export const useSetMessages = () =>

@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from "react";
-import { useUser } from "../../services/store";
+import { useRecipient, useUser } from "../../services/store";
 import humanReadableTimeDifference from "../../helpers/timeHelper";
-import { FaSearch, FaTimes } from "react-icons/fa"; // Import arrow icons
+import { FaSearch, FaTimes } from "react-icons/fa";
+import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
+import ProfileModal from "./ProfileModal";
 import {
   TopBarContainer,
   UserAvatar,
@@ -13,22 +15,24 @@ import {
   SearchInput,
   IconButton,
   ArrowButtonWrapper,
-  ArrowButton, // New styled component for arrow buttons
+  ArrowButton,
 } from "./Style";
-import { IoIosArrowDown } from "react-icons/io";
-import { IoIosArrowUp } from "react-icons/io";
+
 const TopBar = ({
-  recipient,
-  onAvatarClick,
   onSearch,
   setSearchResult,
   searchResult,
   searchInput,
-  setSearchInput
+  setSearchInput,
 }) => {
+  const recipient = useRecipient();
   const currentUser = useUser();
   const [searchVisible, setSearchVisible] = useState(false);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const avatarUrl =
+    currentUser.ID == recipient.ID
+      ? currentUser.profile_picture
+      : recipient?.profile_picture;
   const handleSearch = (e) => {
     e.preventDefault();
     onSearch(searchInput);
@@ -37,28 +41,34 @@ const TopBar = ({
   const toggleSearch = () => {
     setSearchVisible(!searchVisible);
     setSearchInput("");
-    setSearchResult({results:[], pos:0})
+    setSearchResult({ results: [], pos: 0 });
   };
+
   const status = useMemo(() => {
-    if(currentUser.ID == recipient.ID){
-      return "Online"
+    if (currentUser.ID === recipient.ID) {
+      return "Online";
     } else {
-      if(recipient.status == "Offline") {
-        return `Offline ~ ${humanReadableTimeDifference(recipient.last_seen)}`
+      if (recipient.status === "Offline") {
+        return `Offline ~ ${humanReadableTimeDifference(recipient.last_seen)}`;
       }
     }
-    return recipient.status
-  }, [recipient.ID, recipient.status])
+    return recipient.status;
+  }, [recipient.ID, recipient.status]);
+
+  const toggleModal = () => {
+    setIsModalOpen(!isModalOpen);
+  };
+
   return (
     <TopBarContainer>
       <UserAvatar
         src={`http://localhost:8080/${
-          recipient.profile_picture || "uploads/default.jpg"
+          avatarUrl || "uploads/default.jpg"
         }`}
         alt="Profile"
-        onClick={onAvatarClick}
+        onClick={toggleModal}
       />
-      <UserInfo>
+      <UserInfo onClick={toggleModal}>
         <Username>
           {recipient.username}
           {currentUser.ID === recipient.ID ? "(You)" : ""}
@@ -74,37 +84,39 @@ const TopBar = ({
       {!searchVisible && <SearchIcon onClick={toggleSearch} />}
       {searchVisible && (
         <SearchForm onSubmit={handleSearch}>
-        {!!searchResult.results.length && <ArrowButtonWrapper>
-            <ArrowButton
-              type="button"
-              onClick={() => {
-                setSearchResult({
-                  ...searchResult,
-                  pos: searchResult.results[searchResult.pos - 1]
-                    ? searchResult.pos - 1
-                    : searchResult.pos ,
-                });
-              }}
-            >
-              <IoIosArrowUp />
-            </ArrowButton>
-            <small style={{ position:"absolute"}}>
-              { searchResult.pos + 1}
-            </small>
-            <ArrowButton
-              type="button"
-              onClick={() => {
-                setSearchResult({
-                  ...searchResult,
-                  pos: searchResult.results[searchResult.pos + 1]
-                    ? searchResult.pos + 1
-                    : searchResult.pos ,
-                });
-              }}
-            >
-              <IoIosArrowDown />
-            </ArrowButton>
-          </ArrowButtonWrapper>}
+          {!!searchResult.results.length && (
+            <ArrowButtonWrapper>
+              <ArrowButton
+                type="button"
+                onClick={() => {
+                  setSearchResult({
+                    ...searchResult,
+                    pos: searchResult.results[searchResult.pos - 1]
+                      ? searchResult.pos - 1
+                      : searchResult.pos,
+                  });
+                }}
+              >
+                <IoIosArrowUp />
+              </ArrowButton>
+              <small style={{ position: "absolute" }}>
+                {searchResult.pos + 1}
+              </small>
+              <ArrowButton
+                type="button"
+                onClick={() => {
+                  setSearchResult({
+                    ...searchResult,
+                    pos: searchResult.results[searchResult.pos + 1]
+                      ? searchResult.pos + 1
+                      : searchResult.pos,
+                  });
+                }}
+              >
+                <IoIosArrowDown />
+              </ArrowButton>
+            </ArrowButtonWrapper>
+          )}
           <SearchInput
             type="text"
             placeholder="Search messages"
@@ -119,6 +131,11 @@ const TopBar = ({
           </IconButton>
         </SearchForm>
       )}
+      <ProfileModal
+        isOpen={isModalOpen}
+        onClose={toggleModal}
+        user={recipient}
+      />
     </TopBarContainer>
   );
 };

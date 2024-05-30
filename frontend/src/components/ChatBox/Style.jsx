@@ -13,21 +13,21 @@ export const Modal = styled.div`
   backdrop-filter: blur(5px);
 `;
 
-export const ModalContent = styled.div`
-  margin: 10% auto;
-  padding: 20px;
-  width: 90%;
-  max-width: 700px;
-  background-color: white;
-  border-radius: 10px;
-  position: relative;
-  box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-  text-align: center;
-  @media (max-width: 600px) {
-    width: 95%;
-    padding: 15px;
-  }
-`;
+// export const ModalContent = styled.div`
+//   margin: 10% auto;
+//   padding: 20px;
+//   width: 90%;
+//   max-width: 700px;
+//   background-color: white;
+//   border-radius: 10px;
+//   position: relative;
+//   box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
+//   text-align: center;
+//   @media (max-width: 600px) {
+//     width: 95%;
+//     padding: 15px;
+//   }
+// `;
 
 export const ModalClose = styled.span`
   position: absolute;
@@ -371,5 +371,86 @@ text-align: center;
   cursor: pointer;
   &:hover {
     background: #f0f0f0;
+  }
+`;
+
+
+export const ModalContainer = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1000;
+`;
+
+export const ModalContent = styled.div`
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  max-width: 500px;
+  width: 100%;
+`;
+
+export const ModalHeader = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+`;
+
+export const ModalBody = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export const ModalFooter = styled.div`
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+`;
+
+export const Input = styled.input`
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+`;
+
+
+
+export const CloseButton = styled.button`
+  background: none;
+  border: none;
+  font-size: 1.5em;
+  cursor: pointer;
+`;
+
+
+export const UserAvatarModal = styled.img`
+  border-radius: 50%;
+  width: 150px;
+  height: 150px;
+  margin-bottom: 20px;
+  cursor: pointer;
+`;
+
+export const ButtonModal = styled.button`
+  font-weight: bold;
+  margin: 10px;
+  padding: 10px;
+  border-radius: 5px;
+  border: none;
+  background-color: #4caf50;
+  color: white;
+  cursor: pointer;
+  &:hover {
+    background-color: #45a049;
   }
 `;

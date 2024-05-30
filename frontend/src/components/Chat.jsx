@@ -16,6 +16,7 @@ import {
   useSetUsers,
   useToken,
   useUpdateRecipient,
+  useUpdateUserStatus,
   useUser,
   useUsers,
 } from "../services/store";
@@ -39,6 +40,7 @@ const Chat = () => {
   const { fetchUsers } = useFetchUsers();
   const { ws, sendMessage, closeWebSocket } = useWebSocket(token);
   const updateRecipient = useUpdateRecipient()
+  const updateUser = useUpdateUserStatus()
   const deleteMsg = useDeleteMsg()
   useEffect(() => {
     if (ws) {
@@ -86,15 +88,18 @@ const Chat = () => {
         last_seen: message.status,
       });
     }
-    setUsers([
-      ...users.map((u) => {
-        if (u.ID == message.sender_id) {
-          u.status = message.content;
-          u.last_seen = message.status;
-        }
-        return u;
-      }),
-    ]);
+
+    updateUser(message)
+    // setUsers([
+    //   ...users.map((u) => {
+    //     if (u.ID == message.sender_id) {
+    //       u.status = message.content;
+    //       u.last_seen = message.status;
+    //     }
+    //     return u;
+    //   }),
+    // ]);
+    
   };
 
   const handleStatusMessage = (message) => {

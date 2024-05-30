@@ -11,7 +11,7 @@ import { ChatContainer } from "./Style";
 import TopBar from "./TopBar";
 import MessagesContainer from "./MessagesContainer";
 import Form from "./Form";
-import ProfilePictureModal from "./ProfilePictureModal";
+import ProfilePictureModal from "./ProfileModal";
 
 const ChatBox = ({ sendMessage }) => {
   const messages = useMessages();
@@ -164,7 +164,7 @@ const ChatBox = ({ sendMessage }) => {
         handleSelectEmoji={handleSelectEmoji}
         sendMessage={sendMessage}
       />
-      {recipient && (
+      {/* {recipient && (
         <ProfilePictureModal
           show={showProfileModal}
           onClose={() => setShowProfileModal(false)}
@@ -172,7 +172,7 @@ const ChatBox = ({ sendMessage }) => {
             recipient.profile_picture || "uploads/default.jpg"
           }`}
         />
-      )}
+      )} */}
     </ChatContainer>
   );
 };
