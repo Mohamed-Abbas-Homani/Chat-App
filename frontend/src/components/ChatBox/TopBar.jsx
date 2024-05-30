@@ -52,7 +52,7 @@ const TopBar = ({
   return (
     <TopBarContainer>
       <UserAvatar
-        src={`http://192.168.1.5:8080/${
+        src={`http://localhost:8080/${
           recipient.profile_picture || "uploads/default.jpg"
         }`}
         alt="Profile"

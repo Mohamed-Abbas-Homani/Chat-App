@@ -8,7 +8,7 @@ const useUpdateProfile = () => {
   const updateProfile = async (formData) => {
     try {
       const response = await axios.put(
-        `http://192.168.1.5:8080/user/${id}`,
+        `http://localhost:8080/user/${id}`,
         formData,
         {
           headers: {

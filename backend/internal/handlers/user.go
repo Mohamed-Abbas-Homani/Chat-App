@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 
 	"github.com/Mohamed-Abbas-Homani/chat-app/internal/repositories"
@@ -79,11 +81,28 @@ func (uh *UserHandler) UpdateUser(c *gin.Context) {
 	// Update user fields if provided
 	username := c.PostForm("username")
 	if username != "" {
+		// Check if username already exists
+		existingUser, err := uh.userRepository.GetUserByUsername(username)
+		if err == nil && existingUser.ID != user.ID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
+			return
+		}
 		user.Username = username
 	}
 
 	email := c.PostForm("email")
 	if email != "" {
+		// Validate email format
+		if !isValidEmail(email) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
+			return
+		}
+		// Check if email already exists
+		existingUser, err := uh.userRepository.GetUserByEmail(email)
+		if err == nil && existingUser.ID != user.ID {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
+			return
+		}
 		user.Email = email
 	}
 
@@ -95,8 +114,8 @@ func (uh *UserHandler) UpdateUser(c *gin.Context) {
 	// Handle profile picture update
 	file, err := c.FormFile("profilePicture")
 	if err != nil && err != http.ErrMissingFile {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file"})
-		return
+		user.ProfilePicture = "default.jpg"
+		fmt.Println("here")
 	}
 	if err == nil {
 		// Save the file to the server
@@ -119,6 +138,9 @@ func (uh *UserHandler) UpdateUser(c *gin.Context) {
 		}
 		profilePicturePath := tempFile.Name()
 		user.ProfilePicture = profilePicturePath
+	} else if user.ProfilePicture == "" {
+		// Use default profile picture if none is provided and none exists
+		user.ProfilePicture = "default.jpg"
 	}
 
 	// Update user in the database
@@ -185,37 +207,45 @@ func (uh *UserHandler) UploadFile(c *gin.Context) {
 	// Retrieve the file from the request
 	file, err := c.FormFile("file")
 	if err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file"})
-			return
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file"})
+		return
 	}
 
 	// Create the uploads/files directory if it doesn't exist
 	uploadPath := "uploads/files"
 	if err := os.MkdirAll(uploadPath, os.ModePerm); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating upload directory"})
-			return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error creating upload directory"})
+		return
 	}
 
 	// Save the file to the server
 	tempFile, err := os.Create(filepath.Join(uploadPath, file.Filename))
 	if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
-			return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+		return
 	}
 	defer tempFile.Close()
-	
+
 	fileContent, err := file.Open()
 	if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error opening the file"})
-			return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error opening the file"})
+		return
 	}
 	defer fileContent.Close()
-	
+
 	_, err = io.Copy(tempFile, fileContent)
 	if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
-			return
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "File uploaded successfully", "filePath": tempFile.Name()})
+}
+
+// isValidEmail checks if an email is valid
+func isValidEmail(email string) bool {
+	// Simple regex for email validation
+	const emailRegex = `^[a-z0-9._%+\-]+@[a-z0-9.\-]+\.[a-z]{2,4}$`
+	re := regexp.MustCompile(emailRegex)
+	return re.MatchString(email)
 }

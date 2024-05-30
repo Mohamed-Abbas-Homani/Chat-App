@@ -46,22 +46,52 @@ const Button = styled.button`
   }
 `;
 
+const ErrorMessage = styled.div`
+  color: red;
+  margin: 10px 0;
+`;
 
 const Login = ({ isLogin, setIsLogin }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [clientError, setClientError] = useState("");
   const setLogin = useSetLogin();
+
+  const validateForm = () => {
+    if (!email) {
+      setClientError("Email is required.");
+      return false;
+    }
+    if (!/\S+@\S+\.\S+/.test(email)) {
+      setClientError("Email is invalid.");
+      return false;
+    }
+    if (!password) {
+      setClientError("Password is required.");
+      return false;
+    }
+    setClientError("");
+    return true;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
+
     try {
-      const response = await axios.post("http://192.168.1.5:8080/auth/login", {
+      const response = await axios.post("http://localhost:8080/auth/login", {
         email,
         password,
       });
       const { token, user } = response.data;
       setLogin(user, token);
     } catch (error) {
-      console.error("Error during login:", error);
+      if (error.response && error.response.data && error.response.data.error) {
+        setError(error.response.data.error);
+      } else {
+        setError("An error occurred during login. Please try again.");
+      }
     }
   };
 
@@ -69,6 +99,8 @@ const Login = ({ isLogin, setIsLogin }) => {
     <LoginContainer>
       <Form onSubmit={handleSubmit}>
         <h2 style={{ color: "#4caf50" }}>Login</h2>
+        {clientError && <ErrorMessage>{clientError}</ErrorMessage>}
+        {error && <ErrorMessage>{error}</ErrorMessage>}
         <Input
           type="text"
           placeholder="Email"
@@ -82,7 +114,6 @@ const Login = ({ isLogin, setIsLogin }) => {
           onChange={(e) => setPassword(e.target.value)}
         />
         <div style={{ display: "flex", flexDirection: "row" }}>
-          {" "}
           <Button onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? "Switch to Signup" : "Switch to Login"}
           </Button>

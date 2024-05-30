@@ -1,5 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 const SignupContainer = styled.div`
@@ -25,12 +26,12 @@ const Input = styled.input`
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid #ccc;
+  border: 1px solid ${({ error }) => (error ? "red" : "#ccc")};
   width: 200px;
 `;
 
 const Button = styled.button`
-  font-weight:bold;
+  font-weight: bold;
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
@@ -87,12 +88,38 @@ const UserAvatar = styled.img`
   margin-right: 10px;
 `;
 
+const ErrorMessage = styled.p`
+  color: red;
+  font-size: 0.8em;
+  margin: -5px 0 10px 0;
+`;
+
+const BackendErrorMessage = styled.p`
+  color: red;
+  font-size: 1em;
+  margin: 10px 0;
+`;
+
 const Signup = ({ isLogin, setIsLogin }) => {
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [profilePicture, setProfilePicture] = useState(null);
   const [preview, setPreview] = useState(null);
+  const [errors, setErrors] = useState({});
+  const [backendError, setBackendError] = useState(null);
+  const navigate = useNavigate();
+
+  const validateInputs = () => {
+    const newErrors = {};
+    if (!username) newErrors.username = "Username is required";
+    if (!email) newErrors.email = "Email is required";
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = "Email is invalid";
+    if (!password) newErrors.password = "Password is required";
+    else if (password.length < 6)
+      newErrors.password = "Password must be at least 6 characters long";
+    return newErrors;
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -113,15 +140,23 @@ const Signup = ({ isLogin, setIsLogin }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const newErrors = validateInputs();
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setErrors({});
+    setBackendError(null);
+    
     const formData = new FormData();
     formData.append("username", username);
     formData.append("email", email);
     formData.append("password", password);
-    formData.append("profilePicture", profilePicture);
+    if (profilePicture) formData.append("profilePicture", profilePicture);
 
     try {
       const response = await axios.post(
-        "http://192.168.1.5:8080/auth/signup",
+        "http://localhost:8080/auth/signup",
         formData,
         {
           headers: {
@@ -129,8 +164,17 @@ const Signup = ({ isLogin, setIsLogin }) => {
           },
         }
       );
-      console.log("Signed up successfully", response.data);
+      if (response.status === 201) {
+        console.log("Signed up successfully", response.data);
+        setIsLogin(true)
+      }
     } catch (error) {
+      if (error.response && error.response.data && error.response.data.error) {
+        console.log("here")
+        setBackendError(error.response.data.error);
+      } else {
+        setBackendError("An unexpected error occurred. Please try again.");
+      }
       console.error("Error during signup:", error);
     }
   };
@@ -144,25 +188,30 @@ const Signup = ({ isLogin, setIsLogin }) => {
           placeholder="Username"
           value={username}
           onChange={(e) => setUsername(e.target.value)}
+          error={errors.username}
         />
+        {errors.username && <ErrorMessage>{errors.username}</ErrorMessage>}
         <Input
           type="email"
           placeholder="Email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
         />
+        {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
         <Input
           type="password"
           placeholder="Password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
+          error={errors.password}
         />
+        {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
         <FileInputLabel>
           {preview ? (
             <>
-          
-              <UserAvatar src={preview}/>
-              {profilePicture.name}
+              <UserAvatar src={preview} />
+              {profilePicture?.name}
               <CancelButton onClick={handleRemoveImage}>&times;</CancelButton>
             </>
           ) : (
@@ -174,11 +223,12 @@ const Signup = ({ isLogin, setIsLogin }) => {
             onChange={handleFileChange}
           />
         </FileInputLabel>
+        {backendError && <BackendErrorMessage>{backendError}</BackendErrorMessage>}
         <div style={{ display: "flex", flexDirection: "row" }}>
           <Button type="button" onClick={() => setIsLogin(!isLogin)}>
             {isLogin ? "Switch to Signup" : "Switch to Login"}
           </Button>
-          <Button type="submit">SignUp</Button>
+          <Button type="submit">Sign Up</Button>
         </div>
       </Form>
     </SignupContainer>

@@ -34,17 +34,36 @@ func (ah *AuthHandler) SignUp(c *gin.Context) {
     email := c.PostForm("email")
     password := c.PostForm("password")
 
-    file, err := c.FormFile("profilePicture")
-    if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving the file"})
+    // Validate email format
+    if !isValidEmail(email) {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
         return
     }
 
-    // Save the file to the server
-    profilePicturePath := filepath.Join("uploads", file.Filename)
-    if err := c.SaveUploadedFile(file, profilePicturePath); err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+    // Check if username already exists
+    if _, err := ah.userRepo.GetUserByUsername(username); err == nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Username already exists"})
         return
+    }
+
+    // Check if email already exists
+    if _, err := ah.userRepo.GetUserByEmail(email); err == nil {
+        c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
+        return
+    }
+
+    // Handle profile picture
+    var profilePicturePath string
+    file, err := c.FormFile("profilePicture")
+    if err == nil {
+        profilePicturePath = filepath.Join("uploads", file.Filename)
+        if err := c.SaveUploadedFile(file, profilePicturePath); err != nil {
+            c.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving the file"})
+            return
+        }
+    } else {
+        // Use default profile picture if none is provided
+        profilePicturePath = "uploads/default.jpg"
     }
 
     // Hash the password
