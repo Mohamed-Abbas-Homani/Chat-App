@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import useUpdateProfile from "../../hooks/useUpdateProfile";
 import {
   ModalContainer,
@@ -12,6 +12,7 @@ import {
   ButtonModal,
 } from "./Style";
 import {
+  useIsDarkMode,
   useRecipient,
   useSetLogin,
   useUpdateRecipient,
@@ -20,19 +21,25 @@ import {
 } from "../../services/store";
 
 const ProfileModal = ({ isOpen, onClose, user }) => {
+  const recipient = useRecipient();
+  const currentUser = useUser();
+  const isCurrentUser = currentUser.ID === user.ID;
+  const avatarUrl = isCurrentUser
+    ? currentUser.profile_picture
+    : user?.profile_picture;
+  const updateRecipient = useUpdateRecipient();
   const setLogin = useSetLogin();
   const [username, setUsername] = useState(user.username);
   const [bio, setBio] = useState(user.bio || "");
   const [profilePicture, setProfilePicture] = useState(null);
   const { updateProfile } = useUpdateProfile();
-  const recipient = useRecipient();
-  const currentUser = useUser();
-  const isCurrentUser = currentUser.ID === recipient.ID;
-  const avatarUrl = isCurrentUser
-    ? currentUser.profile_picture
-    : user?.profile_picture;
-  const updateRecipient = useUpdateRecipient();
   const updateUser = useUpdateUser();
+  const isDarkMode = useIsDarkMode()
+  useEffect(() => {
+    setUsername(user.username);
+    setBio(user.bio || "");
+  }, [user]);
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     setProfilePicture(file);
@@ -80,10 +87,10 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
 
   return (
     <ModalContainer>
-      <ModalContent>
+      <ModalContent $isDarkMode={isDarkMode}>
         <ModalHeader>
-          <h2>{recipient.username} Profile</h2>
-          <CloseButton onClick={onClose}>&times;</CloseButton>
+          <h2 style={{color:isDarkMode?"white":"black"}}>{user.username} Profile</h2>
+          <CloseButton $isDarkMode={isDarkMode} onClick={onClose}>&times;</CloseButton>
         </ModalHeader>
         <ModalBody>
           <UserAvatarModal
@@ -101,6 +108,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
           />
           <form onSubmit={handleSubmit}>
             <Input
+            $isDarkMode={isDarkMode}
               disabled={!isCurrentUser}
               type="text"
               placeholder="Username"
@@ -108,6 +116,7 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
               onChange={(e) => setUsername(e.target.value)}
             />
             <Input
+            $isDarkMode={isDarkMode}
               disabled={!isCurrentUser}
               type="text"
               placeholder="Bio"
@@ -121,7 +130,6 @@ const ProfileModal = ({ isOpen, onClose, user }) => {
                   type="button"
                   onClick={() => {
                     setLogin({ user: null, token: null });
-                    // if (ws) ws.close();
                   }}
                 >
                   Logout

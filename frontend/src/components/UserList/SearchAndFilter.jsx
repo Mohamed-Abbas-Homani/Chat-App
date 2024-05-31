@@ -8,6 +8,7 @@ import {
 } from "./Style";
 import { MdOnlinePrediction } from "react-icons/md";
 import { FaEyeLowVision } from "react-icons/fa6";
+import { useIsDarkMode } from "../../services/store";
 
 const SearchAndFilter = ({
   searchTerm,
@@ -15,9 +16,11 @@ const SearchAndFilter = ({
   filterOptions,
   onFilterChange,
 }) => {
+  const isDarkMode= useIsDarkMode()
   return (
     <SearchContainer>
       <SearchBar
+        $isDarkMode={isDarkMode} 
         type="text"
         placeholder="Search users"
         value={searchTerm}
@@ -30,7 +33,7 @@ const SearchAndFilter = ({
             checked={filterOptions.showOffline}
             onChange={(e) => onFilterChange("showOffline", e.target.checked)}
           />
-          <Checkmark>
+          <Checkmark $isDarkMode={isDarkMode} >
             <MdOnlinePrediction
               fill={filterOptions.showOffline ? "#888" : "#4caf50"}
               size={"2em"}
@@ -45,7 +48,7 @@ const SearchAndFilter = ({
             checked={filterOptions.showUnseen}
             onChange={(e) => onFilterChange("showUnseen", e.target.checked)}
           />
-          <Checkmark>
+          <Checkmark $isDarkMode={isDarkMode}>
             <FaEyeLowVision
               fill={!filterOptions.showUnseen ? "#888" : "#4caf50"}
               size={"2em"}

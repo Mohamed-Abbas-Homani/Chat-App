@@ -13,27 +13,11 @@ export const Modal = styled.div`
   backdrop-filter: blur(5px);
 `;
 
-// export const ModalContent = styled.div`
-//   margin: 10% auto;
-//   padding: 20px;
-//   width: 90%;
-//   max-width: 700px;
-//   background-color: white;
-//   border-radius: 10px;
-//   position: relative;
-//   box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.3);
-//   text-align: center;
-//   @media (max-width: 600px) {
-//     width: 95%;
-//     padding: 15px;
-//   }
-// `;
-
 export const ModalClose = styled.span`
   position: absolute;
   top: -15px;
   right: 1px;
-  color: #aaa;
+  color: ${(props) => (props.$isDarkMode ? "#aaa" : "#333")};
   font-size: 35px;
   font-weight: bold;
   cursor: pointer;
@@ -84,7 +68,7 @@ export const DownloadLink = styled.a`
 
 export const LastSeen = styled.span`
   font-size: 0.9em;
-  color: #888;
+  color: ${(props) => (props.$isDarkMode ? "#bbb" : "#888")};
 `;
 
 export const MessagesWrapper = styled.div`
@@ -97,8 +81,8 @@ export const FormWrapper = styled.div`
   display: flex;
   align-items: center;
   padding: 10px;
-  border-top: 1px solid #ddd;
-  background-color: #f8f9fa;
+  border-top: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#ddd")};
+  background-color: ${(props) => (props.$isDarkMode ? "#333" : "#f8f9fa")};
   position: relative;
 `;
 
@@ -106,11 +90,13 @@ export const TextArea = styled.textarea`
   flex-grow: 1;
   padding: 10px;
   border-radius: 13px;
-  border: 1px solid #ccc;
+  border: 1px solid ${(props) => (props.$isDarkMode ? "#333" : "#ccc")};
   resize: none;
   outline: none;
   margin-right: 10px;
   height: 40px;
+  background-color: ${(props) => (props.$isDarkMode ? "#555" : "#fff")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#000")};
   &:focus {
     border-color: #4caf50;
   }
@@ -124,8 +110,8 @@ export const EmojiPickerWrapper = styled.div`
   bottom: 70px;
   width: 89%;
   max-width: 550px;
-  background: white;
-  border: 1px solid #ddd;
+  background: ${(props) => (props.$isDarkMode ? "#333" : "#fff")};
+  border: 1px solid ${(props) => (props.$isDarkMode ? "#555" : "#ddd")};
   border-radius: 5px;
   box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
   padding: 10px;
@@ -142,15 +128,18 @@ export const CategoryWrapper = styled.div`
 `;
 
 export const CategoryButton = styled.button`
-  background-color: ${(props) => (props.$active ? "#4caf50" : "#f0f0f0")};
-  color: ${(props) => (props.$active ? "white" : "black")};
+  background-color: ${(props) =>
+    props.$active ? "#4caf50" : props.$isDarkMode ? "#444" : "#f0f0f0"};
+  color: ${(props) =>
+    props.$active ? "white" : props.$isDarkMode ? "#ccc" : "black"};
   border: none;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
   font-size: 1.2em;
   &:hover {
-    background-color: ${(props) => (props.$active ? "#45a049" : "#e0e0e0")};
+    background-color: ${(props) =>
+      props.$active ? "#45a049" : props.$isDarkMode ? "#555" : "#e0e0e0"};
   }
   user-select: none;
 `;
@@ -189,8 +178,8 @@ export const TopBarContainer = styled.div`
   display: flex;
   align-items: center;
   padding: 10px 20px;
-  border-bottom: 1px solid #ddd;
-  background-color: #f8f9fa;
+  border-bottom: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#ddd")};
+  background-color: ${(props) => (props.$isDarkMode ? "#333" : "#f8f9fa")};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   position: relative;
 `;
@@ -215,19 +204,20 @@ export const UserInfo = styled.div`
 export const Username = styled.span`
   font-weight: bold;
   font-size: 1.1em;
-  color: #333;
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#333")};
 `;
 
 export const UserStatus = styled.span`
   font-size: 0.9em;
-  color: ${(props) => (props.$online ? "#4caf50" : "#888")};
+  color: ${(props) =>
+    props.$online ? "#4caf50" : props.$isDarkMode ? "#bbb" : "#888"};
 `;
 
 export const SearchIcon = styled(FaSearch)`
   margin-left: auto;
   font-size: 1.5em;
   cursor: pointer;
-  color: #333;
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#333")};
   transition: color 0.3s;
   &:hover {
     color: #4caf50;
@@ -248,14 +238,17 @@ export const SearchInput = styled.input`
   margin-right: 5px;
   transition: all 1s ease;
   border-radius: 5px;
-  background: #f8f9fa;
-  box-shadow: inset 4px 4px 5px #d3d4d5, inset -4px -4px 5px #ffffff;
+  background: ${(props) => (props.$isDarkMode ? "#444" : "#f8f9fa")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#000")};
+  box-shadow: inset 4px 4px 5px
+      ${(props) => (props.$isDarkMode ? "#333" : "#d3d4d5")},
+    inset -4px -4px 5px ${(props) => (props.$isDarkMode ? "#555" : "#ffffff")};
 `;
 
 export const IconButton = styled.button`
   font-size: 1.4em;
   margin: 8px;
-  color: #333;
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#333")};
   background: none;
   border: none;
   outline: none;
@@ -272,8 +265,9 @@ export const ChatContainer = styled.div`
   justify-content: space-between;
   height: 100vh;
   width: 70%;
-  border-left: 1px solid #ddd;
+  border-left: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#ddd")};
   padding: 0px;
+  background-color: ${(props) => (props.$isDarkMode ? "#222" : "#fff")};
   position: relative;
   @media (max-width: 768px) {
     width: 100%;
@@ -285,7 +279,14 @@ export const SendButton = styled.button`
   padding: 15px;
   border-radius: 50%;
   border: none;
-  background-color: ${(props) => (props.disabled ? "#ccc" : "#4caf50")};
+  background-color: ${(props) =>
+    props.disabled
+      ? props.$isDarkMode
+        ? "#333"
+        : "#ccc"
+      : props.$isDarkMode
+      ? "#111"
+      : "#4caf50"};
   color: white;
   cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
   margin-left: 10px;
@@ -297,7 +298,7 @@ export const SendButton = styled.button`
 
   &:hover {
     background-color: ${(props) =>
-      props.disabled ? "#ccc" : "#45a049"};
+      props.disabled ? (props.$isDarkMode ? "#111" : "#ccc") : "#45a049"};
   }
 `;
 
@@ -327,7 +328,7 @@ export const ArrowButtonWrapper = styled.div`
 
 export const ArrowButton = styled.button`
   margin: 7px;
-  color: #333;
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#333")};
   background: none;
   border: none;
   outline: none;
@@ -338,7 +339,6 @@ export const ArrowButton = styled.button`
     transform: scale(1.1);
   }
 `;
-
 
 export const FileButtonWrapper = styled.div`
   cursor: pointer;
@@ -356,8 +356,8 @@ export const FileTypeMenu = styled.div`
   position: absolute;
   bottom: 65px;
   left: 0;
-  background: white;
-  border: 1px solid #ddd;
+  background: ${(props) => (props.$isDarkMode ? "#333" : "white")};
+  border: 1px solid ${(props) => (props.$isDarkMode ? "#555" : "#ddd")};
   border-radius: 5px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
   z-index: 10;
@@ -366,14 +366,14 @@ export const FileTypeMenu = styled.div`
 `;
 
 export const FileTypeOption = styled.div`
-text-align: center;
+  text-align: center;
   padding: 10px;
   cursor: pointer;
+  color: ${(props) => (props.$isDarkMode ? "#f0f0f0" : "#444")};
   &:hover {
-    background: #f0f0f0;
+    background: ${(props) => (props.$isDarkMode ? "#444" : "#f0f0f0")};
   }
 `;
-
 
 export const ModalContainer = styled.div`
   position: fixed;
@@ -389,7 +389,7 @@ export const ModalContainer = styled.div`
 `;
 
 export const ModalContent = styled.div`
-  background: white;
+  background: ${(props) => (props.$isDarkMode ? "#333" : "white")};
   padding: 20px;
   border-radius: 10px;
   max-width: 500px;
@@ -421,17 +421,17 @@ export const Input = styled.input`
   border-radius: 5px;
   border: 1px solid #ccc;
   width: 100%;
+  background-color: ${(props) => (props.$isDarkMode ? "#555" : "#fff")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#000")};
 `;
-
-
 
 export const CloseButton = styled.button`
   background: none;
   border: none;
   font-size: 1.5em;
   cursor: pointer;
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "#333")};
 `;
-
 
 export const UserAvatarModal = styled.img`
   border-radius: 50%;
@@ -454,3 +454,30 @@ export const ButtonModal = styled.button`
     background-color: #45a049;
   }
 `;
+
+export const RecordingMenu = styled.div`
+  position: absolute;
+  bottom: 85px;
+  right: -30px;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  background-color: ${(props) => (props.$isDarkMode ? "#333" : "#fff")};
+  border: 1px solid ${(props) => (props.$isDarkMode ? "#444" : "#ddd")};
+  border-radius: 5px;
+  padding: 10px;
+  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+  animation: fadeIn 0.3s ease-in-out;
+`;
+
+export const RecordingCancelButton = styled.div`
+  cursor: pointer;
+  margin-right: 10px;
+  color: ${(props) => (props.$isDarkMode ? "#fff" : "#111")};
+`;
+
+export const RecordingTimer = styled.div`
+  font-family: monospace;
+  color: ${(props) => (props.$isDarkMode ? "#fff" : "#111")};
+`;
+

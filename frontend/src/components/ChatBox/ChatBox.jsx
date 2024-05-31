@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import {
+  useIsDarkMode,
   useMessages,
   useRecipient,
   useResetUnseenMsg,
@@ -11,9 +12,10 @@ import { ChatContainer } from "./Style";
 import TopBar from "./TopBar";
 import MessagesContainer from "./MessagesContainer";
 import Form from "./Form";
-import ProfilePictureModal from "./ProfileModal";
+
 
 const ChatBox = ({ sendMessage }) => {
+  const isDarkMode = useIsDarkMode();
   const messages = useMessages();
   const [input, setInput] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -136,7 +138,7 @@ const ChatBox = ({ sendMessage }) => {
   ]);
 
   return (
-    <ChatContainer>
+    <ChatContainer $isDarkMode={isDarkMode}>
       {recipient && (
         <TopBar
           searchInput={searchInput}
@@ -164,15 +166,6 @@ const ChatBox = ({ sendMessage }) => {
         handleSelectEmoji={handleSelectEmoji}
         sendMessage={sendMessage}
       />
-      {/* {recipient && (
-        <ProfilePictureModal
-          show={showProfileModal}
-          onClose={() => setShowProfileModal(false)}
-          src={`http://localhost:8080/${
-            recipient.profile_picture || "uploads/default.jpg"
-          }`}
-        />
-      )} */}
     </ChatContainer>
   );
 };

@@ -4,6 +4,9 @@ import { persist, createJSONStorage } from "zustand/middleware";
 export const useStore = create(
   persist(
     (set, get) => ({
+      isDarkMode: false,
+      toggleDarkMode: () =>
+        set({ isDarkMode: get().isDarkMode ? false : true }),
       user: null,
       token: null,
       users: [],
@@ -24,19 +27,19 @@ export const useStore = create(
             }),
           ],
         }),
-        updateUser: (data) =>{
-          set({
-            users: [
-              ...get().users.map((u) => {
-                if (u.ID == data.ID) {
-                  return {...u, ...data}
-                }
-                return u;
-              }),
-            ],
-          })
-        console.log(data)
-        },
+      updateUser: (data) => {
+        set({
+          users: [
+            ...get().users.map((u) => {
+              if (u.ID == data.ID) {
+                return { ...u, ...data };
+              }
+              return u;
+            }),
+          ],
+        });
+        console.log(data);
+      },
       setRecipient: (recipient) => {
         console.log(recipient.status);
         set({ recipient });
@@ -112,6 +115,9 @@ export const useStoreWithoutStorage = create((set, get) => ({
     }),
 }));
 
+
+export const useIsDarkMode = () => useStore((state) => state.isDarkMode);
+export const useToggleDarkMode = () => useStore((state) => state.toggleDarkMode);
 export const useUser = () => useStore((state) => state.user);
 export const useToken = () =>
   useStore((state) => (state.user ? state.token : null));
@@ -121,8 +127,7 @@ export const useUsers = () => useStore((state) => state.users);
 export const useSetUsers = () => useStore((state) => state.setUsers);
 export const useUpdateUserStatus = () =>
   useStore((state) => state.updateUserStatus);
-export const useUpdateUser = () =>
-  useStore((state) => state.updateUser);
+export const useUpdateUser = () => useStore((state) => state.updateUser);
 export const useMessages = () =>
   useStoreWithoutStorage((state) => state.messages);
 export const useSetMessages = () =>

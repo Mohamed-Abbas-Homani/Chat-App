@@ -1,15 +1,16 @@
-import { useUnseenMessages } from "../../services/store";
+import { useIsDarkMode, useUnseenMessages } from "../../services/store";
 import { UserAvatar, UserInfo, UnseenMessageCounter } from "./Style";
 import { UserItemContainer, UserStatus, Username } from "./Style";
 
 const UserItem = ({ user, selected, onClick, currentUser }) => {
+  const isDarkMode= useIsDarkMode()
   const unseenMessages = useUnseenMessages();
   const avatarUrl =
     (currentUser.ID == user.ID
       ? currentUser.profile_picture
       : user?.profile_picture) ?? "uploads/default.jpg";
   return (
-    <UserItemContainer selected={selected} onClick={onClick}>
+    <UserItemContainer $isDarkMode={isDarkMode} selected={selected} onClick={onClick}>
       <UserAvatar src={`http://localhost:8080/${avatarUrl}`} alt="Profile" />
       <UserInfo>
         <Username>
@@ -17,7 +18,7 @@ const UserItem = ({ user, selected, onClick, currentUser }) => {
           {user.ID === currentUser.ID ? "(You)" : ""}
         </Username>
         <UserStatus
-          $online={user.status !== "Offline" || currentUser.ID === user.ID}
+         $isDarkMode={isDarkMode}  $online={user.status !== "Offline" || currentUser.ID === user.ID}
         >
           {currentUser.ID === user.ID ? "Online" : user.status}
         </UserStatus>

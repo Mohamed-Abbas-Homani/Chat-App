@@ -7,13 +7,13 @@ export const UserItemContainer = styled.div`
   padding: 10px;
   cursor: pointer;
   border-radius: 5px;
-  background: ${(props) => (props.selected ? "#4caf50" : "white")};
-  color: ${(props) => (props.selected ? "white" : "black")};
+  background: ${(props) => (props.selected ? "#4caf50" : props.$isDarkMode ? "#333" : "white")};
+  color: ${(props) => (props.selected ? "white" : props.$isDarkMode ? "#ccc" : "black")};
   margin: 5px 0;
   transition: background 0.3s;
 
   &:hover {
-    background: ${(props) => (props.selected ? "#45a049" : "#ddd")};
+    background: ${(props) => (props.selected ? "#45a049" : props.$isDarkMode ? "#555" : "#ddd")};
   }
 `;
 
@@ -35,7 +35,7 @@ export const Username = styled.span`
 
 export const UserStatus = styled.span`
   font-size: 0.9em;
-  color: ${(props) => (props.$online ? "#4caf50" : "#888")};
+  color: ${(props) => (props.$online ? "#4caf50" : props.$isDarkMode ? "#bbb" : "#888")};
 `;
 
 export const UnseenMessageCounter = styled.div`
@@ -54,15 +54,32 @@ export const UnseenMessageCounter = styled.div`
 `;
 
 export const UserListContainer = styled.div`
+position: relative;
   width: 30%;
   padding: 20px;
-  background: #f0f2f5;
-  border-right: 1px solid #ddd;
+  background: ${(props) => (props.$isDarkMode ? "#222" : "#f0f2f5")};
+  border-right: ${(props) => (props.$isDarkMode ? "1px solid #444" : "1px solid #ddd")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "black")};
 `;
 
 export const UserScrollContainer = styled.div`
   max-height: 75vh; /* Adjust height as needed */
   overflow-y: auto;
+`;
+
+export const DarkModeButton = styled.button`
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  font-size: 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
 `;
 
 export const SearchContainer = styled.div`
@@ -79,8 +96,10 @@ export const SearchBar = styled.input`
   outline: none;
   border: none;
   margin-bottom: 10px;
-  background: #f0f2f5;
-  box-shadow: inset 3px 3px 3px #ccced0, inset -3px -3px 3px #ffffff;
+  background: ${(props) => (props.$isDarkMode ? "#333" : "#f0f2f5")};
+  color: ${(props) => (props.$isDarkMode ? "#ccc" : "black")};
+  box-shadow: inset 3px 3px 3px ${(props) => (props.$isDarkMode ? "#222" : "#ccced0")},
+    inset -3px -3px 3px ${(props) => (props.$isDarkMode ? "#444" : "#ffffff")};
 `;
 
 export const FilterContainer = styled.div`
@@ -107,7 +126,7 @@ export const Checkmark = styled.span`
   display: inline-block;
   width: 20px;
   height: 20px;
-  background-color: #f0f2f5;
+  background-color: ${(props) => (props.$isDarkMode ? "#333" : "#f0f2f5")};
   border-radius: 50%;
   margin: 5px;
   display: flex;

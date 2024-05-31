@@ -3,8 +3,14 @@ import styled, { css, keyframes } from "styled-components";
 import ReactMarkdown from "react-markdown";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import { FaTrash } from "react-icons/fa";
-import { ImageComponent, VideoComponent, AudioComponent, FileComponent } from "./MediaComponents";
+import {
+  ImageComponent,
+  VideoComponent,
+  AudioComponent,
+  FileComponent,
+} from "./MediaComponents";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
+import { useIsDarkMode } from "../../services/store";
 
 const fadeInFromLeft = keyframes`
   from {
@@ -32,10 +38,10 @@ const StatusMark = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  ${({ status }) =>
-    status === "seen"
+  ${({ $status}) =>
+    $status === "seen"
       ? css`
-          color: blue;
+          color:  #07c4a2;
         `
       : css`
           color: gray;
@@ -84,29 +90,32 @@ const Avatar = styled.img`
 `;
 
 const MessageContent = styled.div`
+  color: ${(props) => (props.$isDarkMode ? "white" : "black")};
   word-break: break-all;
   max-width: 60%;
-  padding: 10px 15px;
+  padding: 5px 15px;
   border-radius: 10px;
-  background: linear-gradient(135deg, #f1f1f1 0%, #e6e6e6 100%);
-  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
-  transition: background 0.3s ease;
-
-  ${({ $isCurrentUser }) =>
+  background: ${({ $isCurrentUser, $isDarkMode }) =>
     $isCurrentUser
       ? css`
-          background: linear-gradient(135deg, #dcf8c6 0%, #cdeebb 100%);
+          linear-gradient(135deg, ${$isDarkMode ? "#44323a" : "#fcf8c6"} 0%, ${
+          $isDarkMode ? "#3b4e32" : "#cdeebb"
+        } 100%);
         `
       : css`
-          background: linear-gradient(135deg, #f1f1f1 0%, #e6e6e6 100%);
-        `}
+          linear-gradient(135deg, ${$isDarkMode ? "#655" : "#fff1f1"} 0%, ${
+          $isDarkMode ? "#444" : "#e6e6e6"
+        } 100%);
+        `};
+  box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
+  transition: background 0.3s ease;
 `;
 
 const Username = styled.span`
   font-weight: bold;
   display: block;
   margin-bottom: 5px;
-  color: #333;
+  color: ${({ $isDarkMode }) => ($isDarkMode ? "#ccc" : "#333")};
 `;
 
 const TimestampContainer = styled.div`
@@ -118,11 +127,12 @@ const TimestampContainer = styled.div`
 
 const Timestamp = styled.span`
   font-size: 0.8em;
-  color: #888;
+  color: ${({ $isDarkMode }) => ($isDarkMode ? "#bbb" : "#888")};
   margin-right: 5px;
 `;
 
 const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
+  const isDarkMode = useIsDarkMode();
   const { deleteMessage } = useDeleteMessage();
   const avatarUrl = isCurrentUser
     ? currentUser.profile_picture
@@ -156,8 +166,10 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
         src={`http://localhost:8080/${avatarUrl ?? "uploads/default.jpg"}`}
         alt={username}
       />
-      <MessageContent $isCurrentUser={isCurrentUser}>
-        {!msg.recipient_id && !isCurrentUser && <Username>{username}</Username>}
+      <MessageContent $isCurrentUser={isCurrentUser} $isDarkMode={isDarkMode}>
+        {!msg.recipient_id && !isCurrentUser && (
+          <Username $isDarkMode={isDarkMode}>{username}</Username>
+        )}
         {msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>}
         {msg.file_path && renderMedia(msg.file_path, msg.media_type)}
         <TimestampContainer>
@@ -178,9 +190,9 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
               }}
             />
           )}
-          <Timestamp>{timestamp}</Timestamp>
+          <Timestamp $isDarkMode={isDarkMode}>{timestamp}</Timestamp>
           {msg.sender_id === currentUser.ID && !showTrash && (
-            <StatusMark status={msg.status}>
+            <StatusMark $status={msg.status}>
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
               {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
               {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}

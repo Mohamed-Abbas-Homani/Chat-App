@@ -7,6 +7,7 @@ import {
   EmojisWrapper,
 } from "./Style";
 import { FaSmile, FaPaw, FaUtensils, FaFutbol, FaPlane, FaLightbulb, FaHeart, FaFlag, FaUser, FaTree, FaTh, FaCalculator } from "react-icons/fa";
+import { useIsDarkMode } from "../../services/store";
 
 const emojis = {
   smileys: [
@@ -68,7 +69,7 @@ const EmojiPicker = ({ onSelect }) => {
   const [selectedCategory, setSelectedCategory] = useState("smileys");
   const [multiSelect, setMultiSelect] = useState(false);
   const [selectedEmojis, setSelectedEmojis] = useState([]);
-
+  const isDarkMode = useIsDarkMode()
   useEffect(() => {
     const handleDocumentKeyDown = (e) => {
       if (e.key === "Shift") {
@@ -104,10 +105,11 @@ const EmojiPicker = ({ onSelect }) => {
   };
 
   return (
-    <EmojiPickerWrapper>
+    <EmojiPickerWrapper $isDarkMode={isDarkMode}>
       <CategoryWrapper>
         {categories.map((category) => (
           <CategoryButton
+          $isDarkMode={isDarkMode}
             key={category.name}
             $active={selectedCategory === category.name}
             onClick={() => setSelectedCategory(category.name)}

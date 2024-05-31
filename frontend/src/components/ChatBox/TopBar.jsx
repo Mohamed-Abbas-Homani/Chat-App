@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { useRecipient, useUser } from "../../services/store";
+import { useIsDarkMode, useRecipient, useUser } from "../../services/store";
 import humanReadableTimeDifference from "../../helpers/timeHelper";
 import { FaSearch, FaTimes } from "react-icons/fa";
 import { IoIosArrowDown, IoIosArrowUp } from "react-icons/io";
@@ -29,6 +29,7 @@ const TopBar = ({
   const currentUser = useUser();
   const [searchVisible, setSearchVisible] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const isDarkMode = useIsDarkMode()
   const avatarUrl =
     currentUser.ID == recipient.ID
       ? currentUser.profile_picture
@@ -60,7 +61,7 @@ const TopBar = ({
   };
 
   return (
-    <TopBarContainer>
+    <TopBarContainer $isDarkMode={isDarkMode}>
       <UserAvatar
         src={`http://localhost:8080/${
           avatarUrl || "uploads/default.jpg"
@@ -69,11 +70,12 @@ const TopBar = ({
         onClick={toggleModal}
       />
       <UserInfo onClick={toggleModal}>
-        <Username>
+        <Username $isDarkMode={isDarkMode}>
           {recipient.username}
           {currentUser.ID === recipient.ID ? "(You)" : ""}
         </Username>
         <UserStatus
+        $isDarkMode={isDarkMode}
           $online={
             recipient.status !== "Offline" || currentUser.ID === recipient.ID
           }
@@ -81,12 +83,13 @@ const TopBar = ({
           {status}
         </UserStatus>
       </UserInfo>
-      {!searchVisible && <SearchIcon onClick={toggleSearch} />}
+      {!searchVisible && <SearchIcon $isDarkMode={isDarkMode} onClick={toggleSearch} />}
       {searchVisible && (
         <SearchForm onSubmit={handleSearch}>
           {!!searchResult.results.length && (
             <ArrowButtonWrapper>
               <ArrowButton
+              $isDarkMode={isDarkMode}
                 type="button"
                 onClick={() => {
                   setSearchResult({
@@ -99,10 +102,11 @@ const TopBar = ({
               >
                 <IoIosArrowUp />
               </ArrowButton>
-              <small style={{ position: "absolute" }}>
+              <small style={{ position: "absolute", color:isDarkMode? "white": "black" }}>
                 {searchResult.pos + 1}
               </small>
               <ArrowButton
+              $isDarkMode={isDarkMode}
                 type="button"
                 onClick={() => {
                   setSearchResult({
@@ -118,15 +122,16 @@ const TopBar = ({
             </ArrowButtonWrapper>
           )}
           <SearchInput
+          $isDarkMode={isDarkMode}
             type="text"
             placeholder="Search messages"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
           />
-          <IconButton type="submit">
+          <IconButton type="submit" $isDarkMode={isDarkMode}>
             <FaSearch />
           </IconButton>
-          <IconButton type="button" onClick={toggleSearch}>
+          <IconButton type="button" onClick={toggleSearch} $isDarkMode={isDarkMode}>
             <FaTimes />
           </IconButton>
         </SearchForm>

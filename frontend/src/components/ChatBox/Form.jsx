@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { IoMdSend } from "react-icons/io";
-import { FiPaperclip } from "react-icons/fi";
+import { FiPaperclip, FiMic, FiStopCircle, FiXCircle } from "react-icons/fi";
 import {
   FormWrapper,
   TextArea,
@@ -10,10 +10,13 @@ import {
   HiddenFileInput,
   FileTypeMenu,
   FileTypeOption,
+  RecordingMenu,
+  RecordingCancelButton,
+  RecordingTimer,
 } from "./Style";
 import EmojiPicker from "./EmojiPicker";
 import useFileUpload from "../../hooks/useFileUpload";
-import { useRecipient, useUser } from "../../services/store";
+import { useIsDarkMode, useRecipient, useUser } from "../../services/store";
 import CropperModal from "./PhotoPreprocessing/CropperModal"; // Import CropperModal
 
 // List of emojis to cycle through
@@ -36,6 +39,12 @@ const Form = ({
   const { uploadFile, uploading, error } = useFileUpload();
   const recipient = useRecipient();
   const currentUser = useUser();
+  const isDarkMode = useIsDarkMode();
+  const [isRecording, setIsRecording] = useState(false);
+  const [mediaRecorder, setMediaRecorder] = useState(null);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const recordingIntervalRef = useRef(null);
+  const [isRecordingCancel, setIsRecordingCancel] = useState(false);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -60,21 +69,23 @@ const Form = ({
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
-    if (file && fileInputType.startsWith("image")) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setImageSrc(reader.result);
-        setShowCropper(true);
-      };
-      reader.readAsDataURL(file);
-    } else {
-      uploadAndSendFile(file);
+    if (file) {
+      if (fileInputType.startsWith("image")) {
+        const reader = new FileReader();
+        reader.onload = () => {
+          setImageSrc(reader.result);
+          setShowCropper(true);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        uploadAndSendFile(file, fileInputType);
+      }
     }
   };
 
-  const uploadAndSendFile = async (file, croppedImage = null) => {
+  const uploadAndSendFile = async (file, fileType) => {
     try {
-      const response = await uploadFile(file, croppedImage);
+      const response = await uploadFile(file);
       console.log("File uploaded successfully:", response);
       sendMessage({
         recipient_id: recipient.ID,
@@ -82,7 +93,7 @@ const Form = ({
         message_type: `chat`,
         status: "not sent",
         file_path: response.filePath,
-        media_type: fileInputType,
+        media_type: fileType,
       });
     } catch (err) {
       console.error("File upload failed:", err);
@@ -94,7 +105,7 @@ const Form = ({
       croppedImageDataUrl,
       `cropped-image-at-${new Date().toString()}.jpg`
     );
-    uploadAndSendFile(croppedFile);
+    uploadAndSendFile(croppedFile, "image/*");
   };
 
   const dataURLtoFile = (dataurl, filename) => {
@@ -123,6 +134,63 @@ const Form = ({
     }
   };
 
+  const startRecording = async () => {
+    if (!navigator.mediaDevices || !window.MediaRecorder) {
+      console.error("Media devices or MediaRecorder API not supported");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const recorder = new MediaRecorder(stream);
+      setMediaRecorder(recorder);
+      recorder.ondataavailable = handleAudioDataAvailable;
+      recorder.start();
+      setIsRecording(true);
+      setRecordingTime(0);
+      setIsRecordingCancel(false); // Reset cancel state when starting a new recording
+
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime((prevTime) => prevTime + 1);
+      }, 1000);
+    } catch (error) {
+      console.error("Error accessing microphone:", error);
+    }
+  };
+
+  const stopRecording = () => {
+    if (mediaRecorder) {
+      mediaRecorder.stop();
+      setIsRecording(false);
+      clearInterval(recordingIntervalRef.current);
+    }
+  };
+
+  const handleAudioDataAvailable = (event) => {
+    setIsRecordingCancel((last) => {
+      if (!last) {
+        if (event.data.size > 0) {
+          const audioFile = new File(
+            [event.data],
+            `audio-message-${Date.now()}.mp3`,
+            { type: "audio/mp3" }
+          );
+
+          uploadAndSendFile(audioFile, "audio/*");
+        }
+      }
+      return false;
+    });
+  };
+
+  const cancelRecording = () => {
+    if (mediaRecorder) {
+      setIsRecordingCancel(true);
+      mediaRecorder.stop();
+      setIsRecording(false);
+      clearInterval(recordingIntervalRef.current);
+    }
+  };
   return (
     <>
       {showCropper && (
@@ -132,21 +200,33 @@ const Form = ({
           onCrop={handleCrop}
         />
       )}
-      <FormWrapper>
+      <FormWrapper $isDarkMode={isDarkMode}>
         <FileButtonWrapper onClick={handleFileMenuClick}>
           <FiPaperclip size={"1.2em"} />
           {showFileMenu && (
-            <FileTypeMenu>
-              <FileTypeOption onClick={() => handleFileTypeSelect("image/*")}>
+            <FileTypeMenu $isDarkMode={isDarkMode}>
+              <FileTypeOption
+                onClick={() => handleFileTypeSelect("image/*")}
+                $isDarkMode={isDarkMode}
+              >
                 🖼️ Image
               </FileTypeOption>
-              <FileTypeOption onClick={() => handleFileTypeSelect("video/*")}>
+              <FileTypeOption
+                onClick={() => handleFileTypeSelect("video/*")}
+                $isDarkMode={isDarkMode}
+              >
                 🎥 Video
               </FileTypeOption>
-              <FileTypeOption onClick={() => handleFileTypeSelect("audio/*")}>
+              <FileTypeOption
+                onClick={() => handleFileTypeSelect("audio/*")}
+                $isDarkMode={isDarkMode}
+              >
                 🎵 Audio
               </FileTypeOption>
-              <FileTypeOption onClick={() => handleFileTypeSelect("*/*")}>
+              <FileTypeOption
+                onClick={() => handleFileTypeSelect("*/*")}
+                $isDarkMode={isDarkMode}
+              >
                 📁 File
               </FileTypeOption>
             </FileTypeMenu>
@@ -158,6 +238,7 @@ const Form = ({
           />
         </FileButtonWrapper>
         <TextArea
+          $isDarkMode={isDarkMode}
           placeholder="Type a message"
           value={input}
           onChange={(e) => setInput(e.target.value)}
@@ -170,12 +251,39 @@ const Form = ({
           {currentEmoji}
         </EmojiButtonWrapper>
         {showEmojiPicker && <EmojiPicker onSelect={handleSelectEmoji} />}
-        <SendButton
-          onClick={handleSubmit}
-          disabled={!input.trim() || uploading}
-        >
-          <IoMdSend size={"1.2em"} />
-        </SendButton>
+        {input.trim() ? (
+          <SendButton
+            $isDarkMode={isDarkMode}
+            onClick={handleSubmit}
+            disabled={uploading}
+          >
+            <IoMdSend size={"1.2em"} />
+          </SendButton>
+        ) : (
+          <SendButton
+            $isDarkMode={isDarkMode}
+            onClick={isRecording ? stopRecording : startRecording}
+          >
+            {isRecording ? (
+              <FiStopCircle size={"1.2em"} />
+            ) : (
+              <FiMic size={"1.2em"} />
+            )}
+          </SendButton>
+        )}
+        {isRecording && (
+          <RecordingMenu $isDarkMode={isDarkMode}>
+            <RecordingCancelButton
+              onClick={cancelRecording}
+              $isDarkMode={isDarkMode}
+            >
+              <FiXCircle size={"1.2em"} />
+            </RecordingCancelButton>
+            <RecordingTimer $isDarkMode={isDarkMode}>
+              {new Date(recordingTime * 1000).toISOString().substr(14, 5)}
+            </RecordingTimer>
+          </RecordingMenu>
+        )}
       </FormWrapper>
     </>
   );

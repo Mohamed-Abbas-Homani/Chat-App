@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 
 	"github.com/Mohamed-Abbas-Homani/chat-app/internal/models"
@@ -76,7 +78,6 @@ func (mh *MessageHandler) GetChatHistory(c *gin.Context) {
 	c.JSON(http.StatusOK, messages)
 }
 
-// DeleteMessage handles deleting a message
 func (mh *MessageHandler) DeleteMessage(c *gin.Context) {
 	messageID, err := strconv.ParseUint(c.Param("id"), 10, 32)
 	if err != nil {
@@ -90,10 +91,24 @@ func (mh *MessageHandler) DeleteMessage(c *gin.Context) {
 		return
 	}
 
+	// Attempt to delete the associated file if file path is present
+	if message.FilePath != "" {
+		absolutePath, err := filepath.Abs(message.FilePath)
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to resolve file path"})
+			return
+		}
+
+		if err := os.Remove(absolutePath); err != nil && !os.IsNotExist(err) {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete associated file"})
+			return
+		}
+	}
+
 	if err := mh.messageRepo.DeleteMessage(message); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to delete message"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Message deleted"})
+	c.JSON(http.StatusOK, gin.H{"message": "Message and associated file deleted"})
 }

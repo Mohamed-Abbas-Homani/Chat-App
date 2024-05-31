@@ -1,6 +1,8 @@
+// MediaComponents.jsx
 import React from "react";
 import styled, { css, keyframes } from "styled-components";
 import { FaFileAlt } from "react-icons/fa";
+import { useIsDarkMode } from "../../services/store"; // Import the hook
 
 // Define keyframes for animation
 const fadeIn = keyframes`
@@ -26,20 +28,26 @@ const MediaWrapper = styled.div`
   }
 `;
 
-export const ImageComponent = ({ src }) => (
-  <MediaWrapper>
-    <img src={src} alt="Image" />
-  </MediaWrapper>
-);
+export const ImageComponent = ({ src }) => {
+  const isDarkMode = useIsDarkMode();
+  return (
+    <MediaWrapper>
+      <img src={src} alt="Image" style={{ filter: isDarkMode ? 'brightness(0.8)' : 'none' }} />
+    </MediaWrapper>
+  );
+};
 
-export const VideoComponent = ({ src }) => (
-  <MediaWrapper>
-    <video controls>
-      <source src={src} type="video/mp4" />
-      Your browser does not support the video tag.
-    </video>
-  </MediaWrapper>
-);
+export const VideoComponent = ({ src }) => {
+  const isDarkMode = useIsDarkMode();
+  return (
+    <MediaWrapper>
+      <video controls style={{ filter: isDarkMode ? 'brightness(0.8)' : 'none' }}>
+        <source src={src} type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
+    </MediaWrapper>
+  );
+};
 
 export const AudioComponent = ({ src }) => (
   <MediaWrapper>
@@ -56,21 +64,21 @@ const FileWrapper = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  border: 1px solid #ddd;
+  border: 1px solid ${({ $isDarkMode }) => ($isDarkMode ? "#555" : "#ddd")};
   border-radius: 5px;
   padding: 10px;
-  background-color: #f9f9f9;
+  background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#333" : "#f9f9f9")};
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   animation: ${fadeIn} 0.3s ease-in-out;
   transition: background-color 0.3s ease;
 
   &:hover {
-    background-color: #f1f1f1;
+    background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#444" : "#f1f1f1")};
   }
 
   a {
     text-decoration: none;
-    color: #333;
+    color: ${({ $isDarkMode }) => ($isDarkMode ? "#ddd" : "#333")};
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -94,17 +102,18 @@ const FileIcon = styled(FaFileAlt)`
 const FileName = styled.p`
   margin: 0;
   font-size: 14px;
-  color: #555;
+  color: ${({ $isDarkMode }) => ($isDarkMode ? "#ccc" : "#555")};
   text-align: center;
 `;
 
 export const FileComponent = ({ src }) => {
   const fileName = src.split('/').pop();
+  const isDarkMode = useIsDarkMode();
   return (
-    <FileWrapper>
+    <FileWrapper $isDarkMode={isDarkMode}>
       <a href={src} download>
         <FileIcon />
-        <FileName>{fileName}</FileName>
+        <FileName $isDarkMode={isDarkMode}>{fileName}</FileName>
         <p>Download File</p>
       </a>
     </FileWrapper>

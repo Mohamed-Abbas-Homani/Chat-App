@@ -50,12 +50,6 @@ const PreviewControls = ({
   setSepia,
   grayscale,
   setGrayscale,
-  red,
-  setRed,
-  green,
-  setGreen,
-  blue,
-  setBlue,
   text,
   setText,
   textSize,
@@ -168,42 +162,6 @@ const PreviewControls = ({
         max="100"
         value={grayscale}
         onChange={(e) => setGrayscale(e.target.value)}
-      />
-    </ControlRow>
-    <ControlRow>
-      <Label>
-        <FaTint /> Red:
-      </Label>
-      <RangeInput
-        type="range"
-        min="0"
-        max="200"
-        value={red}
-        onChange={(e) => setRed(e.target.value)}
-      />
-    </ControlRow>
-    <ControlRow>
-      <Label>
-        <FaTint /> Green:
-      </Label>
-      <RangeInput
-        type="range"
-        min="0"
-        max="200"
-        value={green}
-        onChange={(e) => setGreen(e.target.value)}
-      />
-    </ControlRow>
-    <ControlRow>
-      <Label>
-        <FaTint /> Blue:
-      </Label>
-      <RangeInput
-        type="range"
-        min="-180"
-        max="180"
-        value={blue}
-        onChange={(e) => setBlue(e.target.value)}
       />
     </ControlRow>
   </ControlWrapper>

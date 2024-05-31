@@ -1,5 +1,5 @@
 // commonStyles.js
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const Container = styled.div`
   display: flex;
@@ -7,25 +7,28 @@ export const Container = styled.div`
   align-items: center;
   justify-content: center;
   height: 100vh;
-  background-color: #f0f2f5;
+  background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#333" : "#f0f2f5")};
 `;
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
   align-items: center;
-  background: white;
+  background: ${({ $isDarkMode }) => ($isDarkMode ? "#444" : "white")};
   padding: 20px;
   border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: ${({ $isDarkMode }) => ($isDarkMode ? "0 4px 8px rgba(0, 0, 0, 0.5)" : "0 4px 8px rgba(0, 0, 0, 0.1)")};
 `;
 
 export const Input = styled.input`
   margin: 10px;
   padding: 10px;
   border-radius: 5px;
-  border: 1px solid ${({ error }) => (error ? "red" : "#ccc")};
+  outline: none;
+  border: 1px solid ${({ error, $isDarkMode }) => (error ? "red" : $isDarkMode ? "#555" : "#ccc")};
   width: 200px;
+  background-color: transparent;
+  color: ${({ $isDarkMode }) => ($isDarkMode ? "#fff" : "#000")};
 `;
 
 export const Button = styled.button`
@@ -34,11 +37,11 @@ export const Button = styled.button`
   padding: 10px;
   border-radius: 5px;
   border: none;
-  background-color: #4caf50;
+  background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#66bb6a" : "#4caf50")};
   color: white;
   cursor: pointer;
   &:hover {
-    background-color: #45a049;
+    background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#5da048" : "#45a049")};
   }
 `;
 
@@ -70,7 +73,7 @@ export const FileInputLabel = styled.label`
   position: relative;
   background-size: cover;
   background-position: center;
-  background-color: #45a049;
+  background-color: ${({ $isDarkMode }) => ($isDarkMode ? "#5da048" : "#45a049")};
   &:hover {
     filter: brightness(1.1);
   }

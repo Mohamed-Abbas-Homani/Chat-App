@@ -13,8 +13,10 @@ import {
   UserAvatar,
 } from "./Style";
 import useSignup from "../../hooks/useSignup";
+import { useIsDarkMode } from "../../services/store";
 
 const Signup = ({ isLogin, setIsLogin }) => {
+  const isDarkMode = useIsDarkMode()
   const {
     username,
     setUsername,
@@ -32,10 +34,11 @@ const Signup = ({ isLogin, setIsLogin }) => {
   } = useSignup(setIsLogin);
 
   return (
-    <Container>
-      <Form onSubmit={handleSubmit}>
+    <Container $isDarkMode={isDarkMode}>
+      <Form onSubmit={handleSubmit} $isDarkMode={isDarkMode}>
         <h2 style={{ color: "#4caf50" }}>Signup</h2>
         <Input
+        $isDarkMode={isDarkMode}
           type="text"
           placeholder="Username"
           value={username}
@@ -44,6 +47,7 @@ const Signup = ({ isLogin, setIsLogin }) => {
         />
         {errors.username && <ErrorMessage>{errors.username}</ErrorMessage>}
         <Input
+        $isDarkMode={isDarkMode}
           type="email"
           placeholder="Email"
           value={email}
@@ -52,6 +56,7 @@ const Signup = ({ isLogin, setIsLogin }) => {
         />
         {errors.email && <ErrorMessage>{errors.email}</ErrorMessage>}
         <Input
+        $isDarkMode={isDarkMode}
           type="password"
           placeholder="Password"
           value={password}
@@ -59,7 +64,7 @@ const Signup = ({ isLogin, setIsLogin }) => {
           error={errors.password}
         />
         {errors.password && <ErrorMessage>{errors.password}</ErrorMessage>}
-        <FileInputLabel>
+        <FileInputLabel $isDarkMode={isDarkMode}>
           {preview ? (
             <>
               <UserAvatar src={preview} />
@@ -77,10 +82,10 @@ const Signup = ({ isLogin, setIsLogin }) => {
         </FileInputLabel>
         {backendError && <BackendErrorMessage>{backendError}</BackendErrorMessage>}
         <div style={{ display: "flex", flexDirection: "row" }}>
-          <Button type="button" onClick={() => setIsLogin(!isLogin)}>
+          <Button type="button" onClick={() => setIsLogin(!isLogin)} $isDarkMode={isDarkMode}>
             {isLogin ? "Switch to Signup" : "Switch to Login"}
           </Button>
-          <Button type="submit">Sign Up</Button>
+          <Button type="submit" $isDarkMode={isDarkMode}>Sign Up</Button>
         </div>
       </Form>
     </Container>

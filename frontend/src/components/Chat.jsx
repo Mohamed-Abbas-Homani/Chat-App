@@ -4,8 +4,7 @@ import styled from "styled-components";
 import ChatBox from "./ChatBox/ChatBox";
 import UserList from "./UserList/UserList";
 import useWebSocket from "../hooks/useWebSocket";
-import useHandleMessage from "../hooks/useHandleMessage";
-import { useToken, useUsers, useRecipient } from "../services/store";
+import { useToken, useUsers, useRecipient, useUpdateRecipient, useUpdateUserStatus, useMessages, useDeleteMsg, useMarkSeenMsg, useMarkDelivredMsg, useAddUnseenMsg, useAddMessage, useUser } from "../services/store";
 
 const ChatPageContainer = styled.div`
   display: flex;
@@ -17,8 +16,15 @@ const Chat = () => {
   const users = useUsers();
   const recipient = useRecipient();
   const { ws, sendMessage, closeWebSocket } = useWebSocket(token);
-  const handleMessage = useHandleMessage(sendMessage);
-
+  const currentUser = useUser();
+  const addMessage = useAddMessage();
+  const addUnseenMsg = useAddUnseenMsg();
+  const markDelivredMsg = useMarkDelivredMsg();
+  const markSeenMsg = useMarkSeenMsg();
+  const messages = useMessages();
+  const updateRecipient = useUpdateRecipient();
+  const updateUserStatus = useUpdateUserStatus();
+  const deleteMsg = useDeleteMsg();
   useEffect(() => {
     if (ws) {
       ws.onmessage = (event) => {
@@ -28,7 +34,59 @@ const Chat = () => {
     }
     return () => closeWebSocket();
   }, [ws]);
+  const handleMessage = (message) => {
+    switch (message.message_type) {
+      case "chat":
+        handleChatMessage(message);
+        break;
+      case "system":
+        console.log(message);
+        handleSystemMessage(message);
+        break;
+      case "status":
+        handleStatusMessage(message);
+        break;
+      default:
+        break;
+    }
+  };
 
+  const handleChatMessage = (message) => {
+    if (message.sender_id !== currentUser.ID && message.status === "sent") {
+      message.status = "delivred";
+      addUnseenMsg(message.sender_id);
+      sendMessage({ ...message, message_type: "status" });
+    }
+    if (!messages.some((m) => m.ID === message.ID)) {
+      addMessage(message);
+    }
+  };
+
+  const handleSystemMessage = (message) => {
+    if (recipient.ID == message.sender_id) {
+      console.log("asdf")
+      updateRecipient({
+        status: message.content,
+        last_seen: message.status,
+      });
+    }
+
+    updateUserStatus(message)
+ 
+    
+  };
+
+  const handleStatusMessage = (message) => {
+    if (message.status === "deleted"){
+      console.log("delted", message)
+      deleteMsg(message.ID)
+    }
+    else  if (message.status === "delivred") {
+      markDelivredMsg(message);
+    } else {
+      markSeenMsg(message, currentUser.ID);
+    }
+  };
   return (
     <ChatPageContainer>
       <UserList users={users} />
