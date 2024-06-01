@@ -394,6 +394,9 @@ export const ModalContent = styled.div`
   border-radius: 10px;
   max-width: 500px;
   width: 100%;
+  @media (max-width: 600px) {
+    padding: 15px;
+  }
 `;
 
 export const ModalHeader = styled.div`
@@ -439,6 +442,10 @@ export const UserAvatarModal = styled.img`
   height: 150px;
   margin-bottom: 20px;
   cursor: pointer;
+  @media (max-width: 600px) {
+    width: 120px;
+    height: 120px;
+  }
 `;
 
 export const ButtonModal = styled.button`
@@ -452,6 +459,10 @@ export const ButtonModal = styled.button`
   cursor: pointer;
   &:hover {
     background-color: #45a049;
+  }
+  @media (max-width: 600px) {
+    padding: 8px;
+    font-size: 0.9em;
   }
 `;
 
@@ -480,4 +491,3 @@ export const RecordingTimer = styled.div`
   font-family: monospace;
   color: ${(props) => (props.$isDarkMode ? "#fff" : "#111")};
 `;
-
