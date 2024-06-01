@@ -86,7 +86,6 @@ const Form = ({
   const uploadAndSendFile = async (file, fileType) => {
     try {
       const response = await uploadFile(file);
-      console.log("File uploaded successfully:", response);
       sendMessage({
         recipient_id: recipient.ID,
         sender_id: currentUser.ID,

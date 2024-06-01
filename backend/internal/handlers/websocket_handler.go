@@ -1,9 +1,9 @@
 package handlers
 
 import (
-	// "fmt"
 	"log"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/Mohamed-Abbas-Homani/chat-app/internal/config"
@@ -29,6 +29,7 @@ type WebSocketHandler struct {
 	userRepo    *repositories.UserRepository
 	messageRepo *repositories.MessageRepository
 	groupRepo   *repositories.GroupRepository
+	mu          sync.Mutex
 }
 
 func NewWebSocketHandler(cfg *config.AppConfig, db *gorm.DB) *WebSocketHandler {
@@ -36,7 +37,7 @@ func NewWebSocketHandler(cfg *config.AppConfig, db *gorm.DB) *WebSocketHandler {
 		cfg:         cfg,
 		db:          db,
 		clients:     make(map[*Client]bool),
-		broadcast:   make(chan models.Message),
+		broadcast:   make(chan models.Message, 100), // Buffer size can be configured
 		userRepo:    repositories.NewUserRepository(db),
 		messageRepo: repositories.NewMessageRepository(db),
 		groupRepo:   repositories.NewGroupRepository(db),
@@ -49,6 +50,7 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// HandleWebSocket handles WebSocket connection requests
 func (h *WebSocketHandler) HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
@@ -66,25 +68,30 @@ func (h *WebSocketHandler) HandleWebSocket(w http.ResponseWriter, r *http.Reques
 	}()
 
 	h.sendChatHistory(client)
-
 	h.listenForMessages(client)
 }
 
 func (h *WebSocketHandler) registerClient(client *Client) {
+	h.mu.Lock()
 	h.clients[client] = true
+	h.mu.Unlock()
+
 	log.Printf("User %d connected", client.userID)
 	h.updateUserStatus(client.userID, "Online")
-	h.broadcastSystemMessage(client.userID, "Online","")
+	h.broadcastSystemMessage(client.userID, "Online", "")
 }
 
 func (h *WebSocketHandler) unregisterClient(client *Client) {
+	h.mu.Lock()
 	delete(h.clients, client)
+	h.mu.Unlock()
+
 	log.Printf("User %d disconnected", client.userID)
-	last_seen := h.updateUserStatus(client.userID, "Offline")
-	h.broadcastSystemMessage(client.userID, "Offline", last_seen)
+	lastSeen := h.updateUserStatus(client.userID, "Offline")
+	h.broadcastSystemMessage(client.userID, "Offline", lastSeen)
 }
 
-func (h *WebSocketHandler) updateUserStatus(userID uint, status string)string {
+func (h *WebSocketHandler) updateUserStatus(userID uint, status string) string {
 	user, err := h.userRepo.GetUserByID(userID)
 	if err != nil {
 		log.Printf("Failed to find user: %v", err)
@@ -103,12 +110,12 @@ func (h *WebSocketHandler) updateUserStatus(userID uint, status string)string {
 	return user.LastSeen.Format(time.RFC3339)
 }
 
-func (h *WebSocketHandler) broadcastSystemMessage(sourceId uint, content string, last_seen string) {
+func (h *WebSocketHandler) broadcastSystemMessage(userID uint, content, lastSeen string) {
 	msg := models.Message{
 		Content:     content,
-		SenderID:    sourceId, // system message
+		SenderID:    userID,
 		MessageType: models.MessageTypeSystem,
-		Status:      last_seen,
+		Status:      lastSeen,
 	}
 	h.broadcast <- msg
 }
@@ -140,60 +147,71 @@ func (h *WebSocketHandler) listenForMessages(client *Client) {
 
 		switch msg.MessageType {
 		case models.MessageTypeChat:
-			log.Println("Message of type Chat")
-			msg.SenderID = client.userID
-			msg.Status = "sent"
-			if err := h.messageRepo.CreateMessage(&msg); err != nil {
-				log.Printf("Failed to save message: %v", err)
-				continue
-			}
-	
-			log.Printf("Message from user %d saved to database", client.userID)
-			h.sendMessageToRecipient(msg, msg.SenderID)
-			if msg.RecipientID != 0 {
-				h.sendMessageToRecipient(msg, msg.RecipientID)
-			} else if msg.GroupID != 0 {
-				h.sendMessageToGroup(msg)
-			} else {
-				h.broadcast <- msg
-			}
-		
-		
+			h.handleChatMessage(client, &msg)
 		case models.MessageTypeSystem:
-			log.Println("Message of type System")
-			msg.SenderID = client.userID
-			if msg.RecipientID != 0 {
-				h.sendMessageToRecipient(msg, msg.RecipientID)
-			} else if msg.GroupID != 0 {
-				h.sendMessageToGroup(msg)
-			}
-			
+			h.handleSystemMessage(client, &msg)
 		case models.MessageTypeStatus:
-			log.Println("Message of type Status")
-			if(msg.Status == "delivred") {
-				msg.MessageType = models.MessageTypeChat
-				if err := h.messageRepo.UpdateMessage(&msg); err != nil {
-					log.Printf("Failed to save message: %v", err)
-					continue
-				}
-				msg.RecipientID = msg.SenderID
-				msg.MessageType = models.MessageTypeStatus
-				h.sendMessageToRecipient(msg, msg.RecipientID)
-			} else {
-				h.messageRepo.MarkMessagesAsSeen(msg.SenderID, msg.RecipientID)
-				temp := msg.RecipientID
-				msg.RecipientID = msg.SenderID
-				msg.SenderID = temp
-				h.sendMessageToRecipient(msg, msg.RecipientID)
-			}
+			h.handleStatusMessage(&msg)
 		}
 	}
 }
 
+func (h *WebSocketHandler) handleChatMessage(client *Client, msg *models.Message) {
+	log.Println("Handling Chat message")
+	msg.SenderID = client.userID
+	msg.Status = "sent"
+	if err := h.messageRepo.CreateMessage(msg); err != nil {
+		log.Printf("Failed to save message: %v", err)
+		return
+	}
+
+	log.Printf("Message from user %d saved to database", client.userID)
+	if msg.SenderID != msg.RecipientID {
+		h.sendMessageToRecipient(*msg, msg.SenderID)
+	}
+	if msg.RecipientID != 0 {
+		h.sendMessageToRecipient(*msg, msg.RecipientID)
+	} else if msg.GroupID != 0 {
+		h.sendMessageToGroup(*msg)
+	} else {
+		h.broadcast <- *msg
+	}
+}
+
+func (h *WebSocketHandler) handleSystemMessage(client *Client, msg *models.Message) {
+	log.Println("Handling System message")
+	msg.SenderID = client.userID
+	if msg.RecipientID != 0 {
+		h.sendMessageToRecipient(*msg, msg.RecipientID)
+	} else if msg.GroupID != 0 {
+		h.sendMessageToGroup(*msg)
+	}
+}
+
+func (h *WebSocketHandler) handleStatusMessage(msg *models.Message) {
+	log.Println("Handling Status message")
+	if msg.Status == "delivered" {
+		msg.MessageType = models.MessageTypeChat
+		if err := h.messageRepo.UpdateMessage(msg); err != nil {
+			log.Printf("Failed to update message: %v", err)
+			return
+		}
+		msg.RecipientID = msg.SenderID
+		msg.MessageType = models.MessageTypeStatus
+		h.sendMessageToRecipient(*msg, msg.RecipientID)
+	} else {
+		h.messageRepo.MarkMessagesAsSeen(msg.SenderID, msg.RecipientID)
+		temp := msg.RecipientID
+		msg.RecipientID = msg.SenderID
+		msg.SenderID = temp
+		h.sendMessageToRecipient(*msg, msg.RecipientID)
+	}
+}
+
 func (h *WebSocketHandler) Start() {
-	for {
-		msg := <-h.broadcast
+	for msg := range h.broadcast {
 		log.Printf("Broadcasting message: %s", msg.Content)
+		h.mu.Lock()
 		for client := range h.clients {
 			if err := client.conn.WriteJSON(msg); err != nil {
 				log.Printf("WebSocket write error: %v", err)
@@ -201,10 +219,13 @@ func (h *WebSocketHandler) Start() {
 				delete(h.clients, client)
 			}
 		}
+		h.mu.Unlock()
 	}
 }
 
-func (h *WebSocketHandler) sendMessageToRecipient(msg models.Message, recipientID uint ) {
+func (h *WebSocketHandler) sendMessageToRecipient(msg models.Message, recipientID uint) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	for client := range h.clients {
 		if client.userID == recipientID {
 			if err := client.conn.WriteJSON(msg); err != nil {
@@ -212,7 +233,7 @@ func (h *WebSocketHandler) sendMessageToRecipient(msg models.Message, recipientI
 				client.conn.Close()
 				delete(h.clients, client)
 			}
-			log.Printf("Sent message %s of status %s to recipient %d", msg.MessageType, msg.Status, msg.RecipientID)
+			log.Printf("Sent message %s of status %s to recipient %d", msg.MessageType, msg.Status, recipientID)
 		}
 	}
 }
@@ -224,6 +245,8 @@ func (h *WebSocketHandler) sendMessageToGroup(msg models.Message) {
 		return
 	}
 
+	h.mu.Lock()
+	defer h.mu.Unlock()
 	for _, member := range group.Users {
 		for client := range h.clients {
 			if client.userID == member.ID {

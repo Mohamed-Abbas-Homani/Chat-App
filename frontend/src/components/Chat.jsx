@@ -40,7 +40,6 @@ const Chat = () => {
         handleChatMessage(message);
         break;
       case "system":
-        console.log(message);
         handleSystemMessage(message);
         break;
       case "status":
@@ -53,7 +52,7 @@ const Chat = () => {
 
   const handleChatMessage = (message) => {
     if (message.sender_id !== currentUser.ID && message.status === "sent") {
-      message.status = "delivred";
+      message.status = "delivered";
       addUnseenMsg(message.sender_id);
       sendMessage({ ...message, message_type: "status" });
     }
@@ -64,7 +63,6 @@ const Chat = () => {
 
   const handleSystemMessage = (message) => {
     if (recipient.ID == message.sender_id) {
-      console.log("asdf")
       updateRecipient({
         status: message.content,
         last_seen: message.status,
@@ -78,10 +76,9 @@ const Chat = () => {
 
   const handleStatusMessage = (message) => {
     if (message.status === "deleted"){
-      console.log("delted", message)
       deleteMsg(message.ID)
     }
-    else  if (message.status === "delivred") {
+    else  if (message.status === "delivered") {
       markDelivredMsg(message);
     } else {
       markSeenMsg(message, currentUser.ID);

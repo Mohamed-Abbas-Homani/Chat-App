@@ -18,7 +18,6 @@ const useWebSocket = (token) => {
 
   const sendMessage = (msg) => {
     if (ws) {
-      if(msg.status == 'delivred') console.log(msg,"sended\n\n\n")
       ws.send(JSON.stringify(msg));
     }
   };

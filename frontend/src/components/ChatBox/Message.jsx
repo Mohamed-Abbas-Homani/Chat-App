@@ -1,16 +1,21 @@
 import React, { useState } from "react";
 import styled, { css, keyframes } from "styled-components";
 import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import {
+  oneDark,
+  oneLight,
+} from "react-syntax-highlighter/dist/esm/styles/prism";
 import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import { FaTrash } from "react-icons/fa";
-import {
-  ImageComponent,
-  VideoComponent,
-  AudioComponent,
-  FileComponent,
-} from "./MediaComponents";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
 import { useIsDarkMode } from "../../services/store";
+import {
+  AudioComponent,
+  ImageComponent,
+  VideoComponent,
+} from "./MediaComponents/MediaComponents";
+import FileComponent from "./MediaComponents/FileComponent";
 
 const fadeInFromLeft = keyframes`
   from {
@@ -38,10 +43,10 @@ const StatusMark = styled.div`
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  ${({ $status}) =>
+  ${({ $status }) =>
     $status === "seen"
       ? css`
-          color:  #07c4a2;
+          color: #07c4a2;
         `
       : css`
           color: gray;
@@ -91,9 +96,11 @@ const Avatar = styled.img`
 
 const MessageContent = styled.div`
   color: ${(props) => (props.$isDarkMode ? "white" : "black")};
-  word-break: break-all;
+  word-break: break-word; /* Ensures long words break properly */
+  overflow-wrap: break-word; /* Ensures long words wrap within the container */
   max-width: 60%;
-  padding: 5px 15px;
+  padding: 10px 25px;
+  padding-left: 25px;
   border-radius: 10px;
   background: ${({ $isCurrentUser, $isDarkMode }) =>
     $isCurrentUser
@@ -109,6 +116,18 @@ const MessageContent = styled.div`
         `};
   box-shadow: 0 4px 4px rgba(0, 0, 0, 0.05);
   transition: background 0.3s ease;
+
+  img {
+    max-width: 100%; /* Ensures images do not overflow */
+    height: auto;
+    border-radius: 8px;
+    margin-top: 10px;
+  }
+`;
+
+const MarkdownContent = styled(ReactMarkdown)`
+  word-break: break-word;
+  overflow-wrap: break-word;
 `;
 
 const Username = styled.span`
@@ -155,6 +174,26 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
     }
   };
 
+  const components = {
+    code({ node, inline, className, children, ...props }) {
+      const match = /language-(\w+)/.exec(className || "");
+      return !inline && match ? (
+        <SyntaxHighlighter
+          style={isDarkMode ? oneDark : oneLight}
+          language={match[1]}
+          PreTag="div"
+          {...props}
+        >
+          {String(children).replace(/\n$/, "")}
+        </SyntaxHighlighter>
+      ) : (
+        <code className={className} {...props}>
+          {children}
+        </code>
+      );
+    },
+  };
+
   return (
     <MessageContainer
       $isCurrentUser={isCurrentUser}
@@ -170,7 +209,11 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
         {!msg.recipient_id && !isCurrentUser && (
           <Username $isDarkMode={isDarkMode}>{username}</Username>
         )}
-        {msg.content && <ReactMarkdown>{msg.content}</ReactMarkdown>}
+        {msg.content && (
+          <MarkdownContent components={components}>
+            {msg.content}
+          </MarkdownContent>
+        )}
         {msg.file_path && renderMedia(msg.file_path, msg.media_type)}
         <TimestampContainer>
           {msg.sender_id === currentUser.ID && showTrash && (
@@ -194,7 +237,7 @@ const Message = ({ msg, isCurrentUser, user, currentUser, sendMessage }) => {
           {msg.sender_id === currentUser.ID && !showTrash && (
             <StatusMark $status={msg.status}>
               {msg.status === "sent" && <IoCheckmark size={"1.2em"} />}
-              {msg.status === "delivred" && <IoCheckmarkDone size={"1.2em"} />}
+              {msg.status === "delivered" && <IoCheckmarkDone size={"1.2em"} />}
               {msg.status === "seen" && <IoCheckmarkDone size={"1.2em"} />}
             </StatusMark>
           )}

@@ -65,7 +65,6 @@ const useSignup = (setIsLogin) => {
         }
       );
       if (response.status === 201) {
-        console.log("Signed up successfully", response.data);
         setIsLogin(true)
       }
     } catch (error) {

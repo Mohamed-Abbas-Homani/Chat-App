@@ -38,10 +38,8 @@ export const useStore = create(
             }),
           ],
         });
-        console.log(data);
       },
       setRecipient: (recipient) => {
-        console.log(recipient.status);
         set({ recipient });
       },
       updateRecipient: (data) => {
@@ -76,7 +74,7 @@ export const useStoreWithoutStorage = create((set, get) => ({
       messages: [
         ...get().messages.map((m) => {
           if (m.ID == message.ID) {
-            m.status = "delivred";
+            m.status = "delivered";
           }
           return m;
         }),
@@ -115,9 +113,9 @@ export const useStoreWithoutStorage = create((set, get) => ({
     }),
 }));
 
-
 export const useIsDarkMode = () => useStore((state) => state.isDarkMode);
-export const useToggleDarkMode = () => useStore((state) => state.toggleDarkMode);
+export const useToggleDarkMode = () =>
+  useStore((state) => state.toggleDarkMode);
 export const useUser = () => useStore((state) => state.user);
 export const useToken = () =>
   useStore((state) => (state.user ? state.token : null));
