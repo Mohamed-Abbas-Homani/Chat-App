@@ -10,12 +10,8 @@ import { IoCheckmark, IoCheckmarkDone } from "react-icons/io5";
 import { FaTrash } from "react-icons/fa";
 import useDeleteMessage from "../../hooks/useDeleteMessage";
 import { useIsDarkMode } from "../../services/store";
-import {
-  AudioComponent,
-  ImageComponent,
-  VideoComponent,
-} from "./MediaComponents/MediaComponents";
 import FileComponent from "./MediaComponents/FileComponent";
+import { AudioComponent, ImageComponent, VideoComponent } from "./MediaComponents";
 
 const fadeInFromLeft = keyframes`
   from {
@@ -64,7 +60,7 @@ const formatTimestamp = (timestamp) => {
   const minutes = date.getMinutes();
   const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
-  hours = hours ? hours : 12; // the hour '0' should be '12'
+  hours = hours ? hours : 12;
   const strMinutes = minutes < 10 ? `0${minutes}` : minutes;
   return `${hours}:${strMinutes} ${ampm}`;
 };
@@ -96,8 +92,8 @@ const Avatar = styled.img`
 
 const MessageContent = styled.div`
   color: ${(props) => (props.$isDarkMode ? "white" : "black")};
-  word-break: break-word; /* Ensures long words break properly */
-  overflow-wrap: break-word; /* Ensures long words wrap within the container */
+  word-break: break-word;
+  overflow-wrap: break-word;
   max-width: 60%;
   padding: 10px 25px;
   padding-left: 25px;
@@ -118,7 +114,7 @@ const MessageContent = styled.div`
   transition: background 0.3s ease;
 
   img {
-    max-width: 100%; /* Ensures images do not overflow */
+    max-width: 100%;
     height: auto;
     border-radius: 8px;
     margin-top: 10px;
