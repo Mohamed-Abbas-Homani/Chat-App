@@ -107,7 +107,7 @@ const AudioComponent = ({ src }) => {
           onChange={handleSeek}
         />
         <Timestamp $isDarkMode={isDarkMode}>
-          {formatTime(currentTime)} / {formatTime(duration)}
+          {currentTime ? formatTime(currentTime) : formatTime(duration)}
         </Timestamp>
         <SpeedControl
           value={playbackRate}
