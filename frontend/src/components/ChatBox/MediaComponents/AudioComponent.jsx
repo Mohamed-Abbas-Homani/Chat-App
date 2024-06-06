@@ -68,7 +68,7 @@ const AudioComponent = ({ src }) => {
         <SeekBar
           type="range"
           min="0"
-          max={duration}
+          max={Math.floor(duration)}
           value={currentTime}
           onChange={handleSeek}
         />
