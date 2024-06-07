@@ -16,15 +16,13 @@ type MessageHandler struct {
 	db          *gorm.DB
 	messageRepo *repositories.MessageRepository
 	userRepo    *repositories.UserRepository
-	groupRepo   *repositories.GroupRepository
 }
 
-func NewMessageHandler(db *gorm.DB, messageRepo *repositories.MessageRepository, userRepo *repositories.UserRepository, groupRepo *repositories.GroupRepository) *MessageHandler {
+func NewMessageHandler(db *gorm.DB, messageRepo *repositories.MessageRepository, userRepo *repositories.UserRepository) *MessageHandler {
 	return &MessageHandler{
 		db:          db,
 		messageRepo: messageRepo,
 		userRepo:    userRepo,
-		groupRepo:   groupRepo,
 	}
 }
 
@@ -61,7 +59,7 @@ func (mh *MessageHandler) GetMessageByID(c *gin.Context) {
 	c.JSON(http.StatusOK, message)
 }
 
-// GetChatHistory retrieves the chat history between two users or for a group
+// GetChatHistory retrieves the chat history between two users 
 func (mh *MessageHandler) GetChatHistory(c *gin.Context) {
 	userID, err := strconv.ParseUint(c.Param("user_id"), 10, 32)
 	if err != nil {

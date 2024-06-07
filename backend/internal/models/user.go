@@ -15,5 +15,4 @@ type User struct {
 	Status         string    `json:"status"`                                             // Indicates if the user status
 	ProfilePicture string    `json:"profile_picture"`                                    // Path to the user's profile picture
 	Bio            string    `json:"bio"`                                                // Bio of the user
-	Groups         []*Group  `gorm:"many2many:user_groups;"`                             // Groups that the user belongs to
 }
