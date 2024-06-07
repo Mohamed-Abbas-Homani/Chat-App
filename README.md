@@ -8,7 +8,7 @@
 ## backend
 - golang
 - gorm for orm
-- gin for http router
+- gin as web framework
 - gorilla to handle websockets
 
 ## database
