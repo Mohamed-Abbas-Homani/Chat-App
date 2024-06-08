@@ -45,7 +45,7 @@ const TopBar = ({
     setSearchResult({ results: [], pos: 0 });
   };
 
-  const status = useMemo(() => {
+  const status = () => {
     if (currentUser.ID === recipient.ID) {
       return "Online";
     } else {
@@ -54,7 +54,7 @@ const TopBar = ({
       }
     }
     return recipient.status;
-  }, [recipient.ID, recipient.status]);
+  }
 
   const toggleModal = () => {
     setIsModalOpen(!isModalOpen);
@@ -80,7 +80,7 @@ const TopBar = ({
             recipient.status !== "Offline" || currentUser.ID === recipient.ID
           }
         >
-          {status}
+          {status()}
         </UserStatus>
       </UserInfo>
       {!searchVisible && <SearchIcon $isDarkMode={isDarkMode} onClick={toggleSearch} />}
